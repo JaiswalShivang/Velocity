@@ -1,0 +1,7 @@
+// Export all components from a single file for easy imports
+export { default as Navbar } from './Navbar'
+export { default as Layout } from './Layout'
+export { default as Button } from './Button'
+export { default as Input } from './Input'
+export { default as Card } from './Card'
+export { default as FileUpload } from './FileUpload'
