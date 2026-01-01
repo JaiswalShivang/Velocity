@@ -12,6 +12,7 @@ import uploadRoutes from './routes/upload.js';
 import resumeRoutes from './routes/resume.js';
 import enhanceRoutes from './routes/enhance.js';
 import authRoutes from './routes/auth.js';
+import jobsRoutes from './routes/jobsRoute.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -58,6 +59,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/enhance', enhanceRoutes);
+app.use('/api/fetchjobs', jobsRoutes);
 
 // 404 handler
 app.use((req, res) => {
