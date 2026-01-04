@@ -26,12 +26,15 @@ export const verifyToken = async (req, res, next) => {
       // For development, allow bypass if Firebase Admin is not fully configured
       if (process.env.NODE_ENV === 'development' && firebaseError.code === 'app/no-app') {
         console.warn('Firebase Admin not configured, allowing request in development mode');
+        // Use DEV_USER_EMAIL from .env for testing, or default
+        const devEmail = process.env.DEV_USER_EMAIL || 'dev@example.com';
         req.user = {
           uid: 'dev-user',
-          email: 'dev@example.com',
+          email: devEmail,
           name: 'Developer',
           emailVerified: true
         };
+        console.log(`   Dev user email: ${devEmail}`);
         next();
       } else {
         throw new ApiError(401, 'Invalid or expired token');

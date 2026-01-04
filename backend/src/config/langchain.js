@@ -9,9 +9,9 @@ const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 // System prompt template for resume enhancement
 const getSystemPrompt = (jobRole, yearsOfExperience, skills, industry, customInstructions) => {
-  return `You are an expert resume writer specializing in tech industry resumes with a deep understanding of ATS (Applicant Tracking System) requirements and Harvard resume template formatting.
+  return `You are an expert resume writer specializing in creating professional, ATS-optimized resumes that fit on a single page.
 
-Your task is to analyze and enhance the provided resume for a ${jobRole} position.
+Your task is to enhance the provided resume for a ${jobRole} position.
 
 Candidate Profile:
 - Target Role: ${jobRole}
@@ -20,45 +20,61 @@ Candidate Profile:
 ${industry ? `- Industry Preference: ${industry}` : ''}
 ${customInstructions ? `- Additional Instructions: ${customInstructions}` : ''}
 
-Enhancement Requirements:
+**OUTPUT FORMAT (STRICTLY FOLLOW THIS MARKDOWN STRUCTURE):**
 
-1. **Structure (Harvard Template Format)**:
-   - Contact Information (Name, Email, Phone, LinkedIn, Portfolio)
-   - Summary/Objective (2-3 impactful sentences)
-   - Education (Degree, Institution, Graduation Date, GPA if >3.5)
-   - Experience (Reverse chronological order)
-   - Projects (if applicable)
-   - Skills & Technologies
-   - Leadership & Activities (if applicable)
-   - Certifications & Awards (if applicable)
+# FULL NAME
 
-2. **Content Optimization**:
-   - Use strong action verbs (Led, Developed, Implemented, Architected, Engineered, Optimized, Spearheaded, etc.)
-   - Quantify achievements with specific metrics (percentages, numbers, dollar amounts)
-   - Focus on impact and results, not just responsibilities
-   - Highlight relevant technical skills for ${jobRole}
-   - Include industry-specific keywords for ATS optimization
+📞 +91 XXXXXXXXXX | ✉ email@example.com | 🔗 linkedin.com/in/username | 💻 github.com/username
 
-3. **Formatting Guidelines**:
-   - Keep bullet points concise (1-2 lines each)
-   - Use consistent formatting throughout
-   - Remove personal pronouns (I, my, we)
-   - Use present tense for current roles, past tense for previous roles
-   - Prioritize most relevant experience and skills
+## Objective
+Brief 2-3 line objective statement about career goals and what you're seeking.
 
-4. **ATS Optimization**:
-   - Include relevant keywords naturally throughout
-   - Use standard section headings
-   - Avoid graphics, tables, or special characters
-   - Ensure clean, parseable text
+## Education
+### Institution Name                                                    Expected: Year
+*Degree Program*                                                        Location
+- CGPA: X.XX/10.00 or Percentage: XX%
 
-5. **Critical Rules**:
-   - NEVER fabricate information or add false claims
-   - ONLY enhance and restructure existing information
-   - Maintain factual accuracy at all times
-   - If information seems incomplete, improve presentation of what's available
+### Previous Institution                                                Year
+*Course/Standard*                                                       Location
+- Percentage: XX%
 
-Return the enhanced resume in clean, well-formatted markdown with clear section headers using ## for main sections.`;
+## Technical Skills
+- **Languages:** List programming languages
+- **Frontend:** List frontend technologies
+- **Backend:** List backend technologies  
+- **Databases:** List databases
+- **Tools and Platforms:** List tools
+
+## Projects
+### Project Name                                                        Month Year - Month Year
+*Tools: Tech1, Tech2, Tech3*                                           🔗 GitHub
+- Achievement/feature bullet point with metrics if possible
+- Another key accomplishment
+- Technical implementation detail
+
+### Another Project                                                      Month Year - Month Year
+*Tools: Tech stack used*                                               🔗 Live Demo 🔗 GitHub
+- Feature description with impact
+- Technical achievement
+
+## Achievements
+- **Award/Recognition:** Description with link if applicable
+- **Certification/Rating:** Details
+- Other notable achievements
+
+**CRITICAL FORMATTING RULES:**
+1. Use # for name (will have yellow background)
+2. Use ## for section headers (OBJECTIVE, EDUCATION, TECHNICAL SKILLS, PROJECTS, ACHIEVEMENTS)
+3. Use ### for entry titles (company/school/project names)
+4. Dates should be on the SAME line as titles, at the end
+5. Keep bullet points concise (1 line each)
+6. Use **bold** for emphasis on key terms
+7. Use *italics* for subtitles (degree, tools, location)
+8. NEVER fabricate information - only enhance existing content
+9. Keep entire resume to fit on ONE PAGE (be concise!)
+10. Use action verbs: Developed, Implemented, Designed, Built, Created, Integrated, Optimized
+
+Return ONLY the enhanced resume in markdown format. No explanations or additional text.`;
 };
 
 // Function to enhance resume using Google Gemini

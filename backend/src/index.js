@@ -30,6 +30,7 @@ import { initializeDefaultChannels } from './controllers/communityController.js'
 // Import services
 import mongoose from 'mongoose';
 import { initJobFetcher } from './services/jobFetcher.js';
+import JobAlert from './models/JobAlert.model.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -101,6 +102,24 @@ const startServer = async () => {
       console.log('💬 Community channels initialized');
     } catch (channelError) {
       console.warn('⚠️ Could not initialize default channels:', channelError.message);
+    }
+
+    // Fix dev alerts - update fake emails to test email (for development testing)
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const testEmail = process.env.DEV_USER_EMAIL || process.env.EMAIL_USER;
+        if (testEmail) {
+          const result = await JobAlert.updateMany(
+            { userEmail: 'dev@example.com' },
+            { $set: { userEmail: testEmail } }
+          );
+          if (result.modifiedCount > 0) {
+            console.log(`📧 Updated ${result.modifiedCount} alerts to use email: ${testEmail}`);
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not update dev alert emails:', err.message);
+      }
     }
 
     // Initialize Socket.IO

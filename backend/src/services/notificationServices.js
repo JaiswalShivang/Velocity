@@ -2,14 +2,7 @@ import { getJobs } from "../controllers/jobFetch.js";
 import { sendMatchingJobMail } from "./mailService.js";
 
 export const Agent_24_7_Jobs = async (req, res) => {
-  // const user = req.user;
-  const user = {
-    username: "Shivang",
-    email: "jaiswalshivang01@gmail.com",
-    jobRole: "Software Engineer",
-    skills: ["JavaScript", "Node.js", "React"],
-    yearsOfExperience: 3,
-  };
+  const user = req.user;
   try {
     const similarJobs = async () => {
       const jobs = await getJobs(user.jobRole);

@@ -156,6 +156,16 @@ export const sendJobAlertEmail = async ({
   jobs = []
 }) => {
   try {
+    console.log(`\n📧 Mail Service: Preparing to send email`);
+    console.log(`   To: ${userEmail}`);
+    console.log(`   User: ${userName}`);
+    console.log(`   Alert: ${alertTitle}`);
+    console.log(`   Jobs: ${jobs.length}`);
+    
+    if (!userEmail) {
+      throw new Error('No recipient email address provided!');
+    }
+    
     if (!jobs.length) {
       throw new Error('No jobs to send');
     }
@@ -179,7 +189,7 @@ export const sendJobAlertEmail = async ({
             <img src="${job.companyLogo}" alt="${job.company}" style="width: 56px; height: 56px; border-radius: 8px; object-fit: contain; background: #f5f5f5;">
           ` : `
             <div style="width: 56px; height: 56px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">
-              ${job.company.charAt(0).toUpperCase()}
+              ${job.company?.charAt(0)?.toUpperCase() || 'J'}
             </div>
           `}
           <div style="flex: 1;">
@@ -192,12 +202,23 @@ export const sendJobAlertEmail = async ({
               <span>💰 ${formatSalary(job.salary)}</span>
               ${job.isRemote ? '<span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 11px;">🌐 Remote</span>' : ''}
             </div>
-            <p style="margin: 0 0 16px 0; color: #555; font-size: 14px; line-height: 1.5;">
-              ${job.descriptionSnippet || job.description?.substring(0, 200) + '...' || 'No description available.'}
-            </p>
-            <a href="${job.applyLink}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px;">
-              Apply Now →
-            </a>
+            ${job.postedDate ? `<p style="margin: 0 0 8px 0; color: #888; font-size: 12px;">📅 Posted: ${new Date(job.postedDate).toLocaleDateString()}</p>` : ''}
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+              <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">
+                ${job.descriptionSnippet || job.description?.substring(0, 300) + '...' || 'No description available.'}
+              </p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+              <a href="${job.applyLink}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+                Apply Now →
+              </a>
+              ${job.companyUrl ? `
+                <a href="${job.companyUrl}" target="_blank" style="display: inline-block; background: #f0f0f0; color: #333; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px;">
+                  View Company
+                </a>
+              ` : ''}
+            </div>
+            </div>
           </div>
         </div>
       </div>
