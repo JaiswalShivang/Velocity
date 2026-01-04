@@ -13,7 +13,7 @@ import {
 const EMOJI_LIST = ['👍', '❤️', '😂', '🎉', '🔥', '👏', '💯', '🚀', '✨', '🙌', '💪', '🤔'];
 
 export default function MessageInput({ channelId, channelName, onTyping, replyTo, onCancelReply }) {
-  const { sendMessage } = useSocket();
+  const { sendMessage, isConnected } = useSocket();
   const [content, setContent] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [attachments, setAttachments] = useState([]);
@@ -24,6 +24,11 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
     e.preventDefault();
     
     if (!content.trim() && attachments.length === 0) return;
+    
+    if (!isConnected) {
+      console.error('Socket not connected, cannot send message');
+      return;
+    }
 
     sendMessage({
       channelId,

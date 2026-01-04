@@ -488,11 +488,13 @@ export const getConversations = async (req, res, next) => {
       conversations.map(async (conv) => {
         const otherParticipant = conv.participants.find(p => p.uid !== req.user.uid);
         const isOnline = await presenceService.isOnline(otherParticipant?.uid);
+        // When using .lean(), Map is converted to a plain object, so use bracket notation
+        const unreadCountValue = conv.unreadCount?.[req.user.uid] || 0;
         return {
           ...conv,
           otherParticipant,
           isOnline,
-          unreadCount: conv.unreadCount?.get(req.user.uid) || 0
+          unreadCount: unreadCountValue
         };
       })
     );

@@ -38,55 +38,7 @@ export default function Community() {
   // Modal state
   const [showCreateChannel, setShowCreateChannel] = useState(false);
 
-  // Fetch channels on mount
-  useEffect(() => {
-    fetchChannels();
-  }, []);
-
-  // Subscribe to socket events
-  useEffect(() => {
-    const unsubNewMessage = subscribe('new_message', handleNewMessage);
-    const unsubChannelMessages = subscribe('channel_messages', handleChannelMessages);
-    const unsubNewChannel = subscribe('new_channel', handleNewChannel);
-    const unsubMessageEdited = subscribe('message_edited', handleMessageEdited);
-    const unsubMessageDeleted = subscribe('message_deleted', handleMessageDeleted);
-    const unsubReactionUpdated = subscribe('message_reaction_updated', handleReactionUpdated);
-
-    return () => {
-      unsubNewMessage();
-      unsubChannelMessages();
-      unsubNewChannel();
-      unsubMessageEdited();
-      unsubMessageDeleted();
-      unsubReactionUpdated();
-    };
-  }, [subscribe]);
-
-  // Join channel when selected
-  useEffect(() => {
-    if (activeChannel) {
-      joinChannel(activeChannel._id);
-      return () => leaveChannel(activeChannel._id);
-    }
-  }, [activeChannel, joinChannel, leaveChannel]);
-
-  const fetchChannels = async () => {
-    try {
-      setLoadingChannels(true);
-      const data = await communityApi.getChannels();
-      setChannels(data.channels);
-      // Auto-select first channel
-      if (data.channels.length > 0 && !activeChannel) {
-        setActiveChannel(data.channels[0]);
-      }
-    } catch (error) {
-      toast.error('Failed to load channels');
-    } finally {
-      setLoadingChannels(false);
-    }
-  };
-
-  // Socket event handlers
+  // Socket event handlers - must be defined before the useEffect that uses them
   const handleNewMessage = useCallback((data) => {
     if (data.channelId === activeChannel?._id) {
       setMessages(prev => [...prev, data]);
@@ -124,6 +76,54 @@ export default function Community() {
       msg._id === messageId ? { ...msg, reactions } : msg
     ));
   }, []);
+
+  // Fetch channels on mount
+  useEffect(() => {
+    fetchChannels();
+  }, []);
+
+  // Subscribe to socket events
+  useEffect(() => {
+    const unsubNewMessage = subscribe('new_message', handleNewMessage);
+    const unsubChannelMessages = subscribe('channel_messages', handleChannelMessages);
+    const unsubNewChannel = subscribe('new_channel', handleNewChannel);
+    const unsubMessageEdited = subscribe('message_edited', handleMessageEdited);
+    const unsubMessageDeleted = subscribe('message_deleted', handleMessageDeleted);
+    const unsubReactionUpdated = subscribe('message_reaction_updated', handleReactionUpdated);
+
+    return () => {
+      unsubNewMessage();
+      unsubChannelMessages();
+      unsubNewChannel();
+      unsubMessageEdited();
+      unsubMessageDeleted();
+      unsubReactionUpdated();
+    };
+  }, [subscribe, handleNewMessage, handleChannelMessages, handleNewChannel, handleMessageEdited, handleMessageDeleted, handleReactionUpdated]);
+
+  // Join channel when selected
+  useEffect(() => {
+    if (activeChannel) {
+      joinChannel(activeChannel._id);
+      return () => leaveChannel(activeChannel._id);
+    }
+  }, [activeChannel, joinChannel, leaveChannel]);
+
+  const fetchChannels = async () => {
+    try {
+      setLoadingChannels(true);
+      const data = await communityApi.getChannels();
+      setChannels(data.channels);
+      // Auto-select first channel
+      if (data.channels.length > 0 && !activeChannel) {
+        setActiveChannel(data.channels[0]);
+      }
+    } catch (error) {
+      toast.error('Failed to load channels');
+    } finally {
+      setLoadingChannels(false);
+    }
+  };
 
   const handleChannelSelect = (channel) => {
     if (activeChannel?._id !== channel._id) {
