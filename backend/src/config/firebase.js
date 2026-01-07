@@ -34,8 +34,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
       initialized = true;
       console.log('✅ Firebase Admin SDK initialized with service account');
     } else {
-      console.warn('⚠️  Service account file not found at:', serviceAccountPath);
-      console.warn('   Please download it from Firebase Console > Project Settings > Service Accounts');
+      console.log("Error")
     }
   } catch (error) {
     console.error('❌ Failed to load service account:', error.message);
@@ -59,27 +58,14 @@ if (!initialized) {
 }
 
 if (!initialized) {
-  // Initialize without credentials - will fail on Firestore operations
   console.error('');
-  console.error('╔════════════════════════════════════════════════════════════════╗');
-  console.error('║  ❌ FIREBASE SERVICE ACCOUNT NOT CONFIGURED                    ║');
-  console.error('║                                                                ║');
-  console.error('║  To fix this:                                                  ║');
-  console.error('║  1. Go to Firebase Console → Project Settings                  ║');
-  console.error('║  2. Click "Service accounts" tab                               ║');
-  console.error('║  3. Click "Generate new private key"                           ║');
-  console.error('║  4. Save as: backend/serviceAccountKey.json                    ║');
-  console.error('╚════════════════════════════════════════════════════════════════╝');
-  console.error('');
-  
-  // Initialize anyway to prevent crashes, but operations will fail
   try {
     admin.initializeApp({
       projectId: firebaseConfig.projectId,
       storageBucket: firebaseConfig.storageBucket
     });
   } catch (error) {
-    // Already initialized or other error
+    console.log(error);
   }
 }
 

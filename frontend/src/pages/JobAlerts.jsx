@@ -98,7 +98,7 @@ export default function JobAlerts() {
                         </div>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-semibold hover:bg-neutral-200 transition-all"
+                            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-semibold hover:bg-neutral-200 transition-all cursor-pointer"
                         >
                             <Plus className="w-5 h-5" />
                             Create Alert
@@ -134,7 +134,7 @@ export default function JobAlerts() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-medium transition-all ${activeTab === tab.id
+                            className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-medium transition-all cursor-pointer ${activeTab === tab.id
                                     ? 'bg-neutral-900 text-white border border-neutral-800 border-b-transparent'
                                     : 'bg-neutral-800/50 text-neutral-400 hover:text-white border border-transparent'
                                 }`}
@@ -171,7 +171,7 @@ export default function JobAlerts() {
                                     <button
                                         type="submit"
                                         disabled={searchLoading}
-                                        className="px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        className="px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                                     >
                                         {searchLoading ? (
                                             <Loader2 className="w-5 h-5 animate-spin" />
@@ -189,7 +189,7 @@ export default function JobAlerts() {
                                         </p>
                                         <button
                                             onClick={handleCreateAlertFromSearch}
-                                            className="text-sm text-indigo-400 font-medium hover:text-indigo-300 flex items-center gap-1"
+                                            className="text-sm text-indigo-400 font-medium hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
                                         >
                                             <Sparkles className="w-4 h-4" />
                                             Create Alert
@@ -278,7 +278,7 @@ function JobCard({ job, index }) {
                             {job.applyLink && (
                                 <button
                                     onClick={handleApply}
-                                    className="flex items-center gap-1.5 px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-neutral-200 transition-colors text-sm"
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-neutral-200 transition-colors text-sm cursor-pointer"
                                 >
                                     <ExternalLink className="w-4 h-4" />
                                     Apply
@@ -287,7 +287,7 @@ function JobCard({ job, index }) {
                             {job.recruiterEmail && (
                                 <button
                                     onClick={handleEmail}
-                                    className="flex items-center gap-1.5 px-4 py-2 bg-neutral-700 text-white rounded-lg font-medium hover:bg-neutral-600 transition-colors text-sm"
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-neutral-700 text-white rounded-lg font-medium hover:bg-neutral-600 transition-colors text-sm cursor-pointer"
                                 >
                                     <Mail className="w-4 h-4" />
                                     Email

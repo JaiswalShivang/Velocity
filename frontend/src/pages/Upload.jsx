@@ -4,64 +4,46 @@ import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { uploadApi, resumeApi } from '../services/api'
 import Navbar from '../components/Navbar'
-import Button from '../components/Button'
-import Input from '../components/Input'
 import FileUpload from '../components/FileUpload'
-import { FileText, Upload as UploadIcon, Sparkles, ArrowLeft, CheckCircle } from 'lucide-react'
+import { FileText, Upload as UploadIcon, CheckCircle, Target, BarChart3, Zap } from 'lucide-react'
 
 export default function Upload() {
   const navigate = useNavigate()
   
-  const [file, setFile] = useState(null)
-  const [title, setTitle] = useState('')
-  const [extractedText, setExtractedText] = useState('')
+  const [_file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(1) // 1: upload, 2: review
+  const [uploadComplete, setUploadComplete] = useState(false)
 
   const handleFileSelect = async (selectedFile) => {
     setFile(selectedFile)
     setLoading(true)
     
     try {
+      // Upload and extract text
       const response = await uploadApi.uploadPdf(selectedFile)
-      setExtractedText(response.data.extractedText)
-      setTitle(`Resume - ${new Date().toLocaleDateString()}`)
-      setStep(2)
-      toast.success('Text extracted successfully!')
+      const extractedText = response.data.extractedText
+      
+      // Create resume automatically
+      const resumeTitle = `Resume - ${new Date().toLocaleDateString()}`
+      const resumeResponse = await resumeApi.create({
+        originalText: extractedText,
+        title: resumeTitle
+      })
+      
+      setUploadComplete(true)
+      toast.success('Resume uploaded successfully!')
+      
+      // Redirect to enhance page after a brief delay
+      setTimeout(() => {
+        navigate(`/enhance/${resumeResponse.data.id}`)
+      }, 1500)
+      
     } catch (error) {
-      toast.error(error.message || 'Failed to extract text from PDF')
+      toast.error(error.message || 'Failed to upload resume')
       setFile(null)
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleSave = async () => {
-    if (!extractedText.trim()) {
-      toast.error('No content to save')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const response = await resumeApi.create({
-        originalText: extractedText,
-        title: title || 'Untitled Resume'
-      })
-      
-      toast.success('Resume saved!')
-      navigate(`/enhance/${response.data.id}`)
-    } catch (error) {
-      toast.error(error.message || 'Failed to save resume')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleBack = () => {
-    setStep(1)
-    setFile(null)
-    setExtractedText('')
   }
 
   return (
@@ -79,47 +61,60 @@ export default function Upload() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-8 text-center"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm mb-4">
             <UploadIcon className="w-4 h-4" />
             AI-Powered Resume Enhancement
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Upload Resume</h1>
-          <p className="text-neutral-400">
-            Upload your PDF resume to extract text and enhance it with AI
+          <h1 className="text-4xl font-bold text-white mb-4">Upload Your Resume</h1>
+          <p className="text-neutral-400 max-w-xl mx-auto">
+            Upload your PDF resume to get instant ATS score analysis and AI-powered improvements tailored to your target job role
           </p>
         </motion.div>
 
-        {/* Steps Indicator */}
+        {/* Features Preview */}
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-4 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid md:grid-cols-3 gap-4 mb-8"
         >
-          <div className={`flex items-center gap-2 ${step >= 1 ? 'text-white' : 'text-neutral-500'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step >= 1 ? 'bg-indigo-500' : 'bg-neutral-800'
-            }`}>
-              {step > 1 ? <CheckCircle className="w-5 h-5" /> : '1'}
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Target className="w-5 h-5 text-indigo-400" />
             </div>
-            <span className="text-sm font-medium">Upload</span>
+            <div>
+              <p className="text-white font-medium text-sm">ATS Score</p>
+              <p className="text-neutral-500 text-xs">Get your compatibility score</p>
+            </div>
           </div>
-          <div className={`flex-1 h-px ${step > 1 ? 'bg-indigo-500' : 'bg-neutral-800'}`} />
-          <div className={`flex items-center gap-2 ${step >= 2 ? 'text-white' : 'text-neutral-500'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step >= 2 ? 'bg-indigo-500' : 'bg-neutral-800'
-            }`}>
-              2
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="w-5 h-5 text-purple-400" />
             </div>
-            <span className="text-sm font-medium">Review & Save</span>
+            <div>
+              <p className="text-white font-medium text-sm">Detailed Analysis</p>
+              <p className="text-neutral-500 text-xs">See what to improve</p>
+            </div>
+          </div>
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Zap className="w-5 h-5 text-green-400" />
+            </div>
+            <div>
+              <p className="text-white font-medium text-sm">AI Enhancement</p>
+              <p className="text-neutral-500 text-xs">One-click optimization</p>
+            </div>
           </div>
         </motion.div>
 
-        {step === 1 && (
+        {/* Upload Section */}
+        {!uploadComplete ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
             className="rounded-xl bg-neutral-900/50 border border-neutral-800 p-8"
           >
             <div className="flex items-center gap-3 mb-6">
@@ -128,7 +123,7 @@ export default function Upload() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-white">Select PDF File</h2>
-                <p className="text-sm text-neutral-500">We'll extract the text from your resume</p>
+                <p className="text-sm text-neutral-500">We'll extract and analyze your resume automatically</p>
               </div>
             </div>
             <FileUpload 
@@ -136,85 +131,75 @@ export default function Upload() {
               disabled={loading}
             />
             {loading && (
-              <div className="flex items-center justify-center gap-3 mt-6">
+              <div className="flex flex-col items-center justify-center gap-3 mt-6">
                 <div className="relative">
-                  <div className="w-8 h-8 border-2 border-neutral-800 rounded-full" />
-                  <div className="absolute top-0 left-0 w-8 h-8 border-2 border-transparent border-t-indigo-500 rounded-full animate-spin" />
+                  <div className="w-12 h-12 border-2 border-neutral-800 rounded-full" />
+                  <div className="absolute top-0 left-0 w-12 h-12 border-2 border-transparent border-t-indigo-500 rounded-full animate-spin" />
                 </div>
-                <p className="text-neutral-400">Extracting text from PDF...</p>
+                <div className="text-center">
+                  <p className="text-white font-medium">Processing your resume...</p>
+                  <p className="text-neutral-500 text-sm">Extracting text and preparing analysis</p>
+                </div>
               </div>
             )}
           </motion.div>
-        )}
-
-        {step === 2 && (
+        ) : (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-xl bg-neutral-900/50 border border-green-500/30 p-8 text-center"
           >
-            <div className="rounded-xl bg-neutral-900/50 border border-neutral-800 p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">Review Extracted Text</h2>
-                    <p className="text-sm text-neutral-500">Edit before saving if needed</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={handleBack}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-400 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Upload Different File
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-400 mb-2">
-                    Resume Title
-                  </label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., Software Engineer Resume"
-                    className="w-full px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-neutral-400 mb-2">
-                    Extracted Content
-                  </label>
-                  <textarea
-                    value={extractedText}
-                    onChange={(e) => setExtractedText(e.target.value)}
-                    className="w-full h-96 px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm resize-none"
-                    placeholder="Extracted text will appear here..."
-                  />
-                  <p className="text-xs text-neutral-600 mt-2">
-                    You can edit the text before saving
-                  </p>
-                </div>
-              </div>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
+              <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
-
-            <Button
-              variant="gradient"
-              onClick={handleSave}
-              loading={loading}
-              className="w-full !py-4 !text-lg flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-5 h-5" />
-              Save & Continue to AI Enhancement
-            </Button>
+            <h2 className="text-xl font-semibold text-white mb-2">Resume Uploaded Successfully!</h2>
+            <p className="text-neutral-400 mb-4">Redirecting to ATS analysis...</p>
+            <div className="flex justify-center gap-1">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: i * 0.2
+                  }}
+                  className="w-2 h-2 bg-green-500 rounded-full"
+                />
+              ))}
+            </div>
           </motion.div>
         )}
+
+        {/* How it works */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-12"
+        >
+          <h3 className="text-lg font-semibold text-white mb-6 text-center">How It Works</h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3 text-white font-bold">1</div>
+              <h4 className="text-white font-medium mb-1">Upload Resume</h4>
+              <p className="text-neutral-500 text-sm">Upload your PDF resume file</p>
+            </div>
+            <div className="text-center">
+              <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3 text-white font-bold">2</div>
+              <h4 className="text-white font-medium mb-1">Get ATS Score</h4>
+              <p className="text-neutral-500 text-sm">See how your resume scores for your target job</p>
+            </div>
+            <div className="text-center">
+              <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3 text-white font-bold">3</div>
+              <h4 className="text-white font-medium mb-1">Improve with AI</h4>
+              <p className="text-neutral-500 text-sm">One-click AI enhancement based on analysis</p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   )

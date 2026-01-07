@@ -10,7 +10,7 @@ export default function Button({
   onClick,
   className = ''
 }) {
-  const baseStyles = 'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg'
+  const baseStyles = 'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer rounded-lg'
   
   const variants = {
     primary: 'bg-white text-black hover:bg-neutral-200',

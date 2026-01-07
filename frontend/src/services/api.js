@@ -201,6 +201,17 @@ export const enhanceApi = {
       body: JSON.stringify({ resumeText, jobRole })
     })
     return handleResponse(response)
+  },
+
+  // Analyze ATS score
+  async analyzeATS(resumeText, jobRole) {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}/enhance/ats-analysis`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ resumeText, jobRole })
+    })
+    return handleResponse(response)
   }
 }
 

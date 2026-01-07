@@ -125,7 +125,7 @@ export default function ResumeView() {
             {resume?.enhancedText && (
               <button
                 onClick={() => setActiveTab('enhanced')}
-                className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`pb-4 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
                   activeTab === 'enhanced'
                     ? 'border-indigo-500 text-indigo-400'
                     : 'border-transparent text-neutral-500 hover:text-neutral-300'
@@ -136,7 +136,7 @@ export default function ResumeView() {
             )}
             <button
               onClick={() => setActiveTab('original')}
-              className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`pb-4 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'original'
                   ? 'border-indigo-500 text-indigo-400'
                   : 'border-transparent text-neutral-500 hover:text-neutral-300'
@@ -174,13 +174,65 @@ export default function ResumeView() {
             </div>
           </div>
           
-          <div className="bg-neutral-800/50 border border-neutral-700 rounded-lg p-6 min-h-96 overflow-auto">
+          <div className="bg-white border border-neutral-300 rounded-lg p-6 min-h-96 overflow-auto shadow-lg" style={{ maxWidth: '210mm', margin: '0 auto' }}>
             {activeTab === 'enhanced' && resume?.enhancedText ? (
-              <div className="prose prose-sm prose-invert max-w-none prose-headings:text-white prose-p:text-neutral-300 prose-strong:text-white prose-li:text-neutral-300">
-                <ReactMarkdown>{resume.enhancedText}</ReactMarkdown>
+              <div className="resume-preview max-w-none text-black text-sm leading-tight">
+                <ReactMarkdown
+                  components={{
+                    h1: ({node, ...props}) => (
+                      <div className="text-black text-center py-2 px-4 mb-1 text-2xl font-bold border-b-2 border-black">
+                        {props.children}
+                      </div>
+                    ),
+                    h2: ({node, ...props}) => (
+                      <h2 className="text-xs font-bold text-black border-b border-black pb-0.5 mt-3 mb-1 uppercase tracking-wide">
+                        {props.children}
+                      </h2>
+                    ),
+                    h3: ({node, ...props}) => (
+                      <h3 className="text-xs font-bold text-black mt-1.5 mb-0.5">
+                        {props.children}
+                      </h3>
+                    ),
+                    p: ({node, ...props}) => (
+                      <p className="text-xs text-gray-800 mb-0.5 leading-snug">
+                        {props.children}
+                      </p>
+                    ),
+                    ul: ({node, ...props}) => (
+                      <ul className="list-none pl-0 space-y-0 mb-1">
+                        {props.children}
+                      </ul>
+                    ),
+                    li: ({node, ...props}) => (
+                      <li className="text-xs text-gray-800 flex items-start gap-1 leading-snug">
+                        <span className="text-gray-600">◦</span>
+                        <span>{props.children}</span>
+                      </li>
+                    ),
+                    strong: ({node, ...props}) => (
+                      <strong className="font-bold text-black">
+                        {props.children}
+                      </strong>
+                    ),
+                    em: ({node, ...props}) => (
+                      <em className="text-gray-600 text-xs font-normal">
+                        {props.children}
+                      </em>
+                    ),
+                    hr: () => null,
+                    a: ({node, ...props}) => (
+                      <a className="text-blue-600 hover:underline text-xs" href={props.href} target="_blank" rel="noopener noreferrer">
+                        {props.children}
+                      </a>
+                    ),
+                  }}
+                >
+                  {resume.enhancedText}
+                </ReactMarkdown>
               </div>
             ) : (
-              <pre className="whitespace-pre-wrap text-sm text-neutral-300 font-mono">
+              <pre className="whitespace-pre-wrap text-xs text-gray-700 font-mono">
                 {resume?.originalText}
               </pre>
             )}
@@ -218,6 +270,28 @@ export default function ResumeView() {
                 <div>
                   <span className="text-neutral-500">Industry:</span>
                   <span className="ml-2 text-neutral-300">{resume.preferences.industry}</span>
+                </div>
+              )}
+              {resume.preferences.profileInfo && (
+                <div className="sm:col-span-2 pt-2 border-t border-neutral-700">
+                  <span className="text-neutral-500 block mb-2">Profile Links:</span>
+                  <div className="flex flex-wrap gap-3">
+                    {resume.preferences.profileInfo.linkedinUrl && (
+                      <a href={resume.preferences.profileInfo.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 text-xs">
+                        LinkedIn ↗
+                      </a>
+                    )}
+                    {resume.preferences.profileInfo.githubUrl && (
+                      <a href={resume.preferences.profileInfo.githubUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 text-xs">
+                        GitHub ↗
+                      </a>
+                    )}
+                    {resume.preferences.profileInfo.portfolioUrl && (
+                      <a href={resume.preferences.profileInfo.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 text-xs">
+                        Portfolio ↗
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

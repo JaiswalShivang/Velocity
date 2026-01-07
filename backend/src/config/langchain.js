@@ -8,73 +8,81 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 // System prompt template for resume enhancement
-const getSystemPrompt = (jobRole, yearsOfExperience, skills, industry, customInstructions) => {
-  return `You are an expert resume writer specializing in creating professional, ATS-optimized resumes that fit on a single page.
+const getSystemPrompt = (jobRole, yearsOfExperience, skills, industry, customInstructions, profileInfo) => {
+  const { fullName, email, phone, linkedinUrl, githubUrl, portfolioUrl } = profileInfo || {};
+  
+  return `You are an expert resume writer. Create a professional resume in strict Harvard template format.
 
-Your task is to enhance the provided resume for a ${jobRole} position.
+Target Role: ${jobRole}
+Years of Experience: ${yearsOfExperience}
+Key Skills: ${skills.join(', ')}
+${industry ? `Industry: ${industry}` : ''}
+${customInstructions ? `Special Instructions: ${customInstructions}` : ''}
 
-Candidate Profile:
-- Target Role: ${jobRole}
-- Years of Experience: ${yearsOfExperience} years
-- Key Skills to Highlight: ${skills.join(', ')}
-${industry ? `- Industry Preference: ${industry}` : ''}
-${customInstructions ? `- Additional Instructions: ${customInstructions}` : ''}
+USER PROVIDED INFO (use exactly if provided):
+- Name: ${fullName || 'Extract from resume'}
+- Email: ${email || 'Extract from resume'}
+- Phone: ${phone || 'Extract from resume'}
+- LinkedIn: ${linkedinUrl || 'Extract from resume or omit'}
+- GitHub: ${githubUrl || 'Extract from resume or omit'}
+${portfolioUrl ? `- Portfolio: ${portfolioUrl}` : ''}
 
-**OUTPUT FORMAT (STRICTLY FOLLOW THIS MARKDOWN STRUCTURE):**
+STRICT OUTPUT FORMAT (follow exactly):
 
-# FULL NAME
+# [Full Name]
 
-📞 +91 XXXXXXXXXX | ✉ email@example.com | 🔗 linkedin.com/in/username | 💻 github.com/username
+[email@domain.com](mailto:email@domain.com) | [Phone Number] | [LinkedIn](https://linkedin.com/in/username) | [GitHub](https://github.com/username)
 
-## Objective
-Brief 2-3 line objective statement about career goals and what you're seeking.
+## SUMMARY
 
-## Education
-### Institution Name                                                    Expected: Year
-*Degree Program*                                                        Location
-- CGPA: X.XX/10.00 or Percentage: XX%
+[2-3 sentence professional summary highlighting key achievements and expertise for ${jobRole} role]
 
-### Previous Institution                                                Year
-*Course/Standard*                                                       Location
-- Percentage: XX%
+## EDUCATION
 
-## Technical Skills
-- **Languages:** List programming languages
-- **Frontend:** List frontend technologies
-- **Backend:** List backend technologies  
-- **Databases:** List databases
-- **Tools and Platforms:** List tools
+**[Degree Name]** | [University Name] | [Location] | [Graduation Date]
+- GPA: [X.XX] (only if > 3.5)
+- Relevant coursework or honors
 
-## Projects
-### Project Name                                                        Month Year - Month Year
-*Tools: Tech1, Tech2, Tech3*                                           🔗 GitHub
-- Achievement/feature bullet point with metrics if possible
-- Another key accomplishment
-- Technical implementation detail
+## EXPERIENCE
 
-### Another Project                                                      Month Year - Month Year
-*Tools: Tech stack used*                                               🔗 Live Demo 🔗 GitHub
-- Feature description with impact
-- Technical achievement
+**[Job Title]** | [Company Name] | [Location] | [Start Date] - [End Date]
+- [Achievement with quantified impact using action verbs]
+- [Another achievement with metrics]
 
-## Achievements
-- **Award/Recognition:** Description with link if applicable
-- **Certification/Rating:** Details
-- Other notable achievements
+## PROJECTS
 
-**CRITICAL FORMATTING RULES:**
-1. Use # for name (will have yellow background)
-2. Use ## for section headers (OBJECTIVE, EDUCATION, TECHNICAL SKILLS, PROJECTS, ACHIEVEMENTS)
-3. Use ### for entry titles (company/school/project names)
-4. Dates should be on the SAME line as titles, at the end
-5. Keep bullet points concise (1 line each)
-6. Use **bold** for emphasis on key terms
-7. Use *italics* for subtitles (degree, tools, location)
-8. NEVER fabricate information - only enhance existing content
-9. Keep entire resume to fit on ONE PAGE (be concise!)
-10. Use action verbs: Developed, Implemented, Designed, Built, Created, Integrated, Optimized
+**[Project Name]** | [Technologies Used] | [Date]
+- [Description of project with impact/results]
+- [Link if applicable: [Project Link](https://url.com)]
 
-Return ONLY the enhanced resume in markdown format. No explanations or additional text.`;
+## SKILLS
+
+**Languages:** [List]
+**Frameworks:** [List]
+**Tools:** [List]
+**Other:** [List]
+
+CRITICAL FORMATTING RULES:
+1. ALL URLs must be clickable markdown links: [Display Text](https://full-url.com)
+2. Email must be: [email@domain.com](mailto:email@domain.com)
+3. LinkedIn must be: [LinkedIn](https://linkedin.com/in/username)
+4. GitHub must be: [GitHub](https://github.com/username)
+5. Phone numbers are plain text with country code
+6. Use ** for bold text (job titles, degrees, project names)
+7. Use - for bullet points
+8. Each section header uses ## 
+9. Name uses # (single hash)
+10. Contact info goes on ONE line right after name, separated by |
+11. Keep content CONCISE to fit on ONE PAGE
+12. Maximum 2-3 projects, 3-4 bullet points per experience
+
+OUTPUT RULES:
+- Return ONLY the resume markdown, nothing else
+- NO preamble like "Here is the resume"
+- NO notes or commentary
+- NO explanations
+- Start with # [Name]
+- End with the last skill or section`;
 };
 
 // Function to enhance resume using Google Gemini
@@ -84,7 +92,8 @@ export const enhanceResume = async (resumeText, preferences) => {
     yearsOfExperience, 
     skills = [], 
     industry = '', 
-    customInstructions = '' 
+    customInstructions = '',
+    profileInfo = {}
   } = preferences;
 
   try {
@@ -93,7 +102,8 @@ export const enhanceResume = async (resumeText, preferences) => {
       yearsOfExperience, 
       skills, 
       industry, 
-      customInstructions
+      customInstructions,
+      profileInfo
     );
 
     const prompt = `${systemPrompt}\n\nPlease enhance the following resume:\n\n${resumeText}`;
@@ -161,4 +171,92 @@ ${resumeText}`;
   }
 };
 
-export default { enhanceResume, generateSummary, suggestImprovements };
+// Function to analyze ATS score
+export const analyzeATSScore = async (resumeText, jobRole) => {
+  try {
+    const prompt = `You are an expert ATS (Applicant Tracking System) analyzer and resume reviewer. Analyze the provided resume for a ${jobRole} position.
+
+IMPORTANT: Return ONLY valid JSON, no markdown code blocks, no explanations, just pure JSON.
+
+Analyze and return the following JSON structure:
+{
+  "atsScore": <number between 0-100>,
+  "scoreBreakdown": {
+    "keywordMatch": <number 0-100>,
+    "formatting": <number 0-100>,
+    "experienceRelevance": <number 0-100>,
+    "skillsAlignment": <number 0-100>,
+    "educationMatch": <number 0-100>
+  },
+  "strengths": [
+    "<strength 1>",
+    "<strength 2>",
+    "<strength 3>"
+  ],
+  "improvements": [
+    {
+      "category": "<category name>",
+      "issue": "<specific issue>",
+      "suggestion": "<how to fix it>",
+      "priority": "<high/medium/low>"
+    }
+  ],
+  "missingKeywords": ["<keyword1>", "<keyword2>"],
+  "summary": "<2-3 sentence overall assessment>"
+}
+
+Rules:
+1. Be specific and actionable in improvements
+2. Provide 4-6 improvement suggestions
+3. Score fairly based on actual resume content
+4. Consider ATS parsing, keyword density, and relevance to ${jobRole}
+5. Missing keywords should be relevant to ${jobRole} position
+
+Resume:
+${resumeText}`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Parse JSON from response
+    let analysisData;
+    try {
+      // Remove markdown code blocks if present
+      const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      analysisData = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error('Failed to parse ATS analysis JSON:', parseError);
+      // Return default structure on parse error
+      analysisData = {
+        atsScore: 50,
+        scoreBreakdown: {
+          keywordMatch: 50,
+          formatting: 50,
+          experienceRelevance: 50,
+          skillsAlignment: 50,
+          educationMatch: 50
+        },
+        strengths: ["Unable to fully analyze - please try again"],
+        improvements: [{
+          category: "General",
+          issue: "Analysis incomplete",
+          suggestion: "Please try analyzing again",
+          priority: "high"
+        }],
+        missingKeywords: [],
+        summary: "Unable to complete full analysis. Please try again."
+      };
+    }
+    
+    return {
+      success: true,
+      analysis: analysisData
+    };
+  } catch (error) {
+    console.error('Error analyzing ATS score:', error);
+    throw new Error(`Failed to analyze ATS score: ${error.message}`);
+  }
+};
+
+

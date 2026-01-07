@@ -1,5 +1,5 @@
 import express from 'express';
-import { enhanceResume, generateSummary, suggestImprovements } from '../config/langchain.js';
+import { enhanceResume, generateSummary, suggestImprovements, analyzeATSScore } from '../config/langchain.js';
 import { verifyToken } from '../middleware/auth.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 
@@ -94,6 +94,31 @@ router.post('/suggestions', verifyToken, asyncHandler(async (req, res) => {
   } catch (error) {
     console.error('Suggestions generation error:', error);
     throw new ApiError(500, 'Failed to generate suggestions. Please try again.');
+  }
+}));
+
+// Analyze ATS score
+router.post('/ats-analysis', verifyToken, asyncHandler(async (req, res) => {
+  const { resumeText, jobRole } = req.body;
+
+  if (!resumeText || !resumeText.trim()) {
+    throw new ApiError(400, 'Resume text is required');
+  }
+
+  if (!jobRole) {
+    throw new ApiError(400, 'Job role is required');
+  }
+
+  try {
+    const result = await analyzeATSScore(resumeText, jobRole);
+    
+    res.json({
+      success: true,
+      data: result.analysis
+    });
+  } catch (error) {
+    console.error('ATS analysis error:', error);
+    throw new ApiError(500, 'Failed to analyze ATS score. Please try again.');
   }
 }));
 

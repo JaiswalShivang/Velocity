@@ -100,7 +100,7 @@ export default function Navbar() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 text-neutral-400 hover:text-red-400 hover:bg-red-950/50 rounded-lg text-sm font-medium transition-all"
+                  className="flex items-center gap-2 px-4 py-2 text-neutral-400 hover:text-red-400 hover:bg-red-950/50 rounded-lg text-sm font-medium transition-all cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -127,7 +127,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-neutral-900 text-neutral-400"
+            className="md:hidden p-2 rounded-lg hover:bg-neutral-900 text-neutral-400 cursor-pointer"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -182,7 +182,7 @@ export default function Navbar() {
                     handleLogout()
                     setMobileMenuOpen(false)
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-base font-medium text-red-400 hover:bg-red-950/50 transition-all"
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-base font-medium text-red-400 hover:bg-red-950/50 transition-all cursor-pointer"
                 >
                   <LogOut className="w-5 h-5" />
                   Logout

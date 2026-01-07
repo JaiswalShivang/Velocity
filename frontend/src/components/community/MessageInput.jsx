@@ -125,9 +125,9 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
             <span className="font-medium text-neutral-300">{replyTo.sender.name}</span>
             <p className="text-neutral-500 truncate">{replyTo.content}</p>
           </div>
-          <button 
+          <button
             onClick={onCancelReply}
-            className="p-1 text-neutral-500 hover:text-neutral-300"
+            className="p-1 text-neutral-500 hover:text-neutral-300 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -152,7 +152,7 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
               </span>
               <button
                 onClick={() => removeAttachment(index)}
-                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -176,7 +176,7 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 rounded-lg"
+            className="p-2 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 rounded-lg cursor-pointer"
           >
             <Paperclip className="w-5 h-5" />
           </button>
@@ -201,7 +201,7 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
                 <button
                   type="button"
                   onClick={() => setShowEmoji(!showEmoji)}
-                  className={`p-1.5 rounded-lg transition-colors ${
+                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                     showEmoji ? 'text-indigo-400 bg-indigo-500/20' : 'text-neutral-500 hover:text-neutral-300'
                   }`}
                 >
@@ -217,7 +217,7 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
                           key={emoji}
                           type="button"
                           onClick={() => insertEmoji(emoji)}
-                          className="p-2 text-xl hover:bg-neutral-700 rounded-lg"
+                          className="p-2 text-xl hover:bg-neutral-700 rounded-lg cursor-pointer"
                         >
                           {emoji}
                         </button>
@@ -230,7 +230,7 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
               {/* Mention Button */}
               <button
                 type="button"
-                className="p-1.5 text-neutral-500 hover:text-neutral-300 rounded-lg"
+                className="p-1.5 text-neutral-500 hover:text-neutral-300 rounded-lg cursor-pointer"
               >
                 <AtSign className="w-5 h-5" />
               </button>
@@ -241,7 +241,7 @@ export default function MessageInput({ channelId, channelName, onTyping, replyTo
           <button
             type="submit"
             disabled={!content.trim() && attachments.length === 0}
-            className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <Send className="w-5 h-5" />
           </button>

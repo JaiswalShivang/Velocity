@@ -68,7 +68,6 @@ export default function JobSearch() {
   const handleSearch = async (e) => {
     e?.preventDefault()
     if (!searchQuery.trim()) {
-      toast.error('Please enter a job title or keyword')
       return
     }
 
@@ -217,9 +216,9 @@ export default function JobSearch() {
                 <button
                   type="button"
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-4 rounded-xl border transition-all ${
-                    showFilters 
-                      ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400' 
+                  className={`px-4 py-4 rounded-xl border transition-all cursor-pointer ${
+                    showFilters
+                      ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400'
                       : 'bg-neutral-800/50 border-neutral-700 text-neutral-400 hover:bg-neutral-800'
                   }`}
                 >
@@ -298,7 +297,7 @@ export default function JobSearch() {
                     <button
                       key={search}
                       onClick={() => handleQuickSearch(search)}
-                      className="px-4 py-2 bg-neutral-800 hover:bg-indigo-500/20 hover:text-indigo-400 hover:border-indigo-500/30 border border-neutral-700 rounded-full text-sm text-neutral-400 transition-all"
+                      className="px-4 py-2 bg-neutral-800 hover:bg-indigo-500/20 hover:text-indigo-400 hover:border-indigo-500/30 border border-neutral-700 rounded-full text-sm text-neutral-400 transition-all cursor-pointer"
                     >
                       {search}
                     </button>
@@ -435,7 +434,7 @@ export default function JobSearch() {
                       <div className="flex flex-col gap-2 ml-4">
                         <button
                           onClick={() => handleSaveJob(job)}
-                          className={`p-2 rounded-lg transition-colors ${
+                          className={`p-2 rounded-lg transition-colors cursor-pointer ${
                             savedJobs.has(job.job_id || job.id)
                               ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
                               : 'bg-neutral-800 text-neutral-500 hover:bg-indigo-500/20 hover:text-indigo-400 border border-neutral-700'
@@ -457,7 +456,7 @@ export default function JobSearch() {
                         href={job.job_apply_link || job.applyLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-neutral-200 text-black rounded-lg font-medium transition-colors"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-neutral-200 text-black rounded-lg font-medium transition-colors cursor-pointer"
                       >
                         Apply Now
                         <ExternalLink className="w-4 h-4" />
