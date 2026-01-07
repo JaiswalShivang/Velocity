@@ -116,6 +116,14 @@ router.post('/', verifyToken, asyncHandler(async (req, res) => {
     const userEmail = req.user.email;
     const userName = req.user.name || req.user.displayName || 'Job Seeker';
 
+    console.log(`📧 Creating alert for user: ${userId}`);
+    console.log(`   Email from token: ${userEmail}`);
+    console.log(`   Name: ${userName}`);
+
+    if (!userEmail) {
+        throw new ApiError(400, 'User email is required. Please ensure you are logged in with a valid account.');
+    }
+
     const {
         title,
         keywords = [],
@@ -123,8 +131,7 @@ router.post('/', verifyToken, asyncHandler(async (req, res) => {
         remoteOnly = false,
         salaryMin = null,
         salaryMax = null,
-        employmentType = ['full-time'],
-        frequency = 'daily'
+        employmentType = ['full-time']
     } = req.body;
 
     // Validation
@@ -155,7 +162,6 @@ router.post('/', verifyToken, asyncHandler(async (req, res) => {
         salaryMin,
         salaryMax,
         employmentType,
-        frequency,
         isActive: true
     });
 
@@ -188,7 +194,6 @@ router.put('/:id', verifyToken, asyncHandler(async (req, res) => {
         salaryMin,
         salaryMax,
         employmentType,
-        frequency,
         isActive
     } = req.body;
 
@@ -200,7 +205,6 @@ router.put('/:id', verifyToken, asyncHandler(async (req, res) => {
     if (salaryMin !== undefined) alert.salaryMin = salaryMin;
     if (salaryMax !== undefined) alert.salaryMax = salaryMax;
     if (employmentType !== undefined) alert.employmentType = employmentType;
-    if (frequency !== undefined) alert.frequency = frequency;
     if (isActive !== undefined) alert.isActive = isActive;
 
     await alert.save();
@@ -284,6 +288,47 @@ router.post('/:id/test', verifyToken, asyncHandler(async (req, res) => {
     } catch (error) {
         throw new ApiError(500, `Failed to check alert: ${error.message}`);
     }
+}));
+
+/**
+ * POST /api/job-alerts/fix-email
+ * Fix alerts that don't have the user's email (updates with current user email)
+ */
+router.post('/fix-email', verifyToken, asyncHandler(async (req, res) => {
+    const userId = req.user.uid;
+    const userEmail = req.user.email;
+    const userName = req.user.name || req.user.displayName || 'Job Seeker';
+
+    if (!userEmail) {
+        throw new ApiError(400, 'Could not get your email. Please re-login.');
+    }
+
+    // Update all alerts for this user that are missing email
+    const result = await JobAlert.updateMany(
+        { 
+            userId,
+            $or: [
+                { userEmail: { $exists: false } },
+                { userEmail: null },
+                { userEmail: '' }
+            ]
+        },
+        { 
+            $set: { 
+                userEmail,
+                userName 
+            } 
+        }
+    );
+
+    console.log(`✅ Fixed ${result.modifiedCount} alerts for user ${userId} with email ${userEmail}`);
+
+    res.json({
+        success: true,
+        message: `Fixed ${result.modifiedCount} alerts`,
+        modifiedCount: result.modifiedCount,
+        userEmail
+    });
 }));
 
 export default router;

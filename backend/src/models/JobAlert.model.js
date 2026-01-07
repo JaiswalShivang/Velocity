@@ -45,11 +45,6 @@ const jobAlertSchema = new mongoose.Schema({
         enum: ['full-time', 'part-time', 'contract', 'internship'],
         default: 'full-time'
     }],
-    frequency: {
-        type: String,
-        enum: ['realtime', 'daily', 'weekly'],
-        default: 'daily'
-    },
     isActive: {
         type: Boolean,
         default: true,
@@ -74,6 +69,5 @@ const jobAlertSchema = new mongoose.Schema({
 // Compound indexes for efficient querying
 jobAlertSchema.index({ userId: 1, isActive: 1 });
 jobAlertSchema.index({ isActive: 1, lastCheckedAt: 1 });
-jobAlertSchema.index({ frequency: 1, isActive: 1 });
 
 export default mongoose.model('JobAlert', jobAlertSchema);

@@ -54,6 +54,13 @@ export const processAlert = async (alertData) => {
     const { alertId, userId, userEmail, userName, title, keywords, location, remoteOnly, employmentType } = alertData;
 
     console.log(`\n📧 Processing alert: ${title} for user ${userId}`);
+    console.log(`   📬 Email will be sent to: ${userEmail || 'NO EMAIL PROVIDED!'}`);
+    console.log(`   👤 User name: ${userName || 'Unknown'}`);
+
+    if (!userEmail) {
+        console.error('❌ ERROR: No email address found for this alert!');
+        return { success: false, error: 'No email address' };
+    }
 
     try {
         // Build search query from alert preferences
@@ -273,7 +280,7 @@ export const scheduleAlertChecks = () => {
         try {
             // Get all active alerts
             const activeAlerts = await JobAlert.find({ isActive: true })
-                .select('_id userId userEmail userName title keywords location remoteOnly employmentType frequency')
+                .select('_id userId userEmail userName title keywords location remoteOnly employmentType')
                 .lean();
 
             if (!activeAlerts.length) {
@@ -328,7 +335,7 @@ const runAlertCheck = async () => {
     try {
         // Get all active alerts
         const activeAlerts = await JobAlert.find({ isActive: true })
-            .select('_id userId userEmail userName title keywords location remoteOnly employmentType frequency')
+            .select('_id userId userEmail userName title keywords location remoteOnly employmentType')
             .lean();
 
         if (!activeAlerts.length) {
@@ -337,6 +344,11 @@ const runAlertCheck = async () => {
         }
 
         console.log(`📋 Found ${activeAlerts.length} active alerts`);
+        
+        // Debug: Log each alert's details
+        activeAlerts.forEach((alert, i) => {
+            console.log(`   Alert ${i + 1}: "${alert.title}" - Email: ${alert.userEmail || 'NO EMAIL!'}`);
+        });
 
         // Prepare alert data for queue
         const alertsToQueue = activeAlerts.map(alert => ({

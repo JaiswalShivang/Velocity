@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Bell, MapPin, DollarSign, Briefcase, Tag, Zap } from 'lucide-react';
+import { X, Bell, MapPin, DollarSign, Briefcase, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { jobAlertsApi } from '../services/api';
 
@@ -9,12 +9,6 @@ const EMPLOYMENT_TYPES = [
     { value: 'part-time', label: 'Part-time' },
     { value: 'contract', label: 'Contract' },
     { value: 'internship', label: 'Internship' }
-];
-
-const FREQUENCY_OPTIONS = [
-    { value: 'realtime', label: 'Real-time', description: 'Instant notifications' },
-    { value: 'daily', label: 'Daily', description: 'Once per day digest' },
-    { value: 'weekly', label: 'Weekly', description: 'Weekly summary' }
 ];
 
 export default function JobAlertModal({ isOpen, onClose, onSuccess, editAlert = null }) {
@@ -26,8 +20,7 @@ export default function JobAlertModal({ isOpen, onClose, onSuccess, editAlert = 
         remoteOnly: editAlert?.remoteOnly || false,
         salaryMin: editAlert?.salaryMin || '',
         salaryMax: editAlert?.salaryMax || '',
-        employmentType: editAlert?.employmentType || ['full-time'],
-        frequency: editAlert?.frequency || 'daily'
+        employmentType: editAlert?.employmentType || ['full-time']
     });
 
     const handleInputChange = (e) => {
@@ -65,8 +58,7 @@ export default function JobAlertModal({ isOpen, onClose, onSuccess, editAlert = 
                 remoteOnly: formData.remoteOnly,
                 salaryMin: formData.salaryMin ? Number(formData.salaryMin) : null,
                 salaryMax: formData.salaryMax ? Number(formData.salaryMax) : null,
-                employmentType: formData.employmentType,
-                frequency: formData.frequency
+                employmentType: formData.employmentType
             };
 
             if (editAlert) {
@@ -240,35 +232,6 @@ export default function JobAlertModal({ isOpen, onClose, onSuccess, editAlert = 
                                             }`}
                                     >
                                         {type.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Frequency */}
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-300 mb-2">
-                                <Zap className="w-4 h-4 inline mr-1.5" />
-                                Notification Frequency
-                            </label>
-                            <div className="grid grid-cols-3 gap-3">
-                                {FREQUENCY_OPTIONS.map(option => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => setFormData(prev => ({ ...prev, frequency: option.value }))}
-                                        className={`p-3 rounded-lg border-2 text-center transition-all ${formData.frequency === option.value
-                                                ? 'border-indigo-500 bg-indigo-500/10'
-                                                : 'border-neutral-700 hover:border-neutral-600 bg-neutral-800'
-                                            }`}
-                                    >
-                                        <div className={`text-sm font-medium ${formData.frequency === option.value ? 'text-indigo-400' : 'text-neutral-300'
-                                            }`}>
-                                            {option.label}
-                                        </div>
-                                        <div className="text-xs text-neutral-500 mt-0.5">
-                                            {option.description}
-                                        </div>
                                     </button>
                                 ))}
                             </div>

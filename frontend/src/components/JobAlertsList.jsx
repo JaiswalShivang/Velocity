@@ -98,15 +98,6 @@ export default function JobAlertsList() {
         });
     };
 
-    const getFrequencyBadge = (frequency) => {
-        const colors = {
-            realtime: 'bg-green-500/20 text-green-400 border border-green-500/30',
-            daily: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-            weekly: 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-        };
-        return colors[frequency] || 'bg-neutral-800 text-neutral-400 border border-neutral-700';
-    };
-
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -192,9 +183,6 @@ export default function JobAlertsList() {
                                     <div>
                                         <div className="flex items-center gap-3">
                                             <h3 className="font-semibold text-white text-lg">{alert.title}</h3>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getFrequencyBadge(alert.frequency)}`}>
-                                                {alert.frequency}
-                                            </span>
                                             {!alert.isActive && (
                                                 <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-700 text-neutral-400">
                                                     Paused

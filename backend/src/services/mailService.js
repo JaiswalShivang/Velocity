@@ -3,7 +3,9 @@ import axios from "axios";
 import "dotenv/config";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -12,6 +14,11 @@ const transporter = nodemailer.createTransport({
     rejectUnauthorized: false
   }
 });
+
+// Verify transporter on startup
+transporter.verify()
+  .then(() => console.log('✅ Email service ready'))
+  .catch(err => console.error('❌ Email service error:', err.message));
 
 export const sendJobApplicationEmail = async ({
   recruiterEmail,
@@ -151,7 +158,7 @@ export const sendMatchingJobMail = async ({
  */
 export const sendJobAlertEmail = async ({
   userEmail,
-  userName = 'Job Seeker',
+  userName = 'there',
   alertTitle,
   jobs = []
 }) => {
@@ -172,62 +179,43 @@ export const sendJobAlertEmail = async ({
 
     // Format salary display
     const formatSalary = (salary) => {
-      if (!salary || (!salary.min && !salary.max)) return 'Not specified';
+      if (!salary || (!salary.min && !salary.max)) return null;
       const currency = salary.currency || 'USD';
-      const period = salary.period || 'yearly';
       if (salary.min && salary.max) {
-        return `${currency} ${salary.min.toLocaleString()} - ${salary.max.toLocaleString()} / ${period}`;
+        return `${currency} ${salary.min.toLocaleString()} - ${salary.max.toLocaleString()}`;
       }
-      return `${currency} ${(salary.min || salary.max).toLocaleString()} / ${period}`;
+      return `${currency} ${(salary.min || salary.max).toLocaleString()}`;
     };
 
-    // Generate job cards HTML (1-indexed as per user requirement)
-    const jobCardsHtml = jobs.map((job, index) => `
-      <div style="background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #667eea;">
-        <div style="display: flex; align-items: flex-start; gap: 16px;">
-          ${job.companyLogo ? `
-            <img src="${job.companyLogo}" alt="${job.company}" style="width: 56px; height: 56px; border-radius: 8px; object-fit: contain; background: #f5f5f5;">
-          ` : `
-            <div style="width: 56px; height: 56px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">
-              ${job.company?.charAt(0)?.toUpperCase() || 'J'}
-            </div>
-          `}
-          <div style="flex: 1;">
-            <div style="color: #888; font-size: 12px; margin-bottom: 4px;">Job #${index + 1}</div>
-            <h3 style="margin: 0 0 8px 0; color: #1a1a2e; font-size: 18px;">${job.title}</h3>
-            <p style="margin: 0 0 12px 0; color: #667eea; font-weight: 500;">${job.company}</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #666;">
-              <span>📍 ${job.location || 'Remote'}</span>
-              <span>💼 ${job.employmentType || 'Full-time'}</span>
-              <span>💰 ${formatSalary(job.salary)}</span>
-              ${job.isRemote ? '<span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 11px;">🌐 Remote</span>' : ''}
-            </div>
-            ${job.postedDate ? `<p style="margin: 0 0 8px 0; color: #888; font-size: 12px;">📅 Posted: ${new Date(job.postedDate).toLocaleDateString()}</p>` : ''}
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-              <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">
-                ${job.descriptionSnippet || job.description?.substring(0, 300) + '...' || 'No description available.'}
-              </p>
-            </div>
-            <div style="display: flex; gap: 12px;">
-              <a href="${job.applyLink}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
-                Apply Now →
-              </a>
-              ${job.companyUrl ? `
-                <a href="${job.companyUrl}" target="_blank" style="display: inline-block; background: #f0f0f0; color: #333; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px;">
-                  View Company
-                </a>
-              ` : ''}
-            </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join('');
+    // Generate clean job list HTML
+    const jobListHtml = jobs.map((job, index) => {
+      const salary = formatSalary(job.salary);
+      return `
+        <tr>
+          <td style="padding: 20px 0; border-bottom: 1px solid #e5e5e5;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <h3 style="margin: 0 0 4px 0; color: #333; font-size: 16px; font-weight: 600;">${job.title}</h3>
+                  <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${job.company}${job.location ? ` • ${job.location}` : ''}</p>
+                  <p style="margin: 0; color: #888; font-size: 13px;">
+                    ${job.employmentType || 'Full-time'}${salary ? ` • ${salary}` : ''}${job.isRemote ? ' • Remote' : ''}
+                  </p>
+                </td>
+                <td style="text-align: right; vertical-align: middle; width: 100px;">
+                  <a href="${job.applyLink}" target="_blank" style="display: inline-block; background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">Apply</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"Velocity Jobs" <${process.env.EMAIL_USER}>`,
       to: userEmail,
-      subject: `🚀 ${jobs.length} New Job${jobs.length > 1 ? 's' : ''} Matching "${alertTitle}"`,
+      subject: `${jobs.length} new job${jobs.length > 1 ? 's' : ''} for "${alertTitle}"`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -235,43 +223,68 @@ export const sendJobAlertEmail = async ({
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5;">
-          <div style="max-width: 650px; margin: 0 auto; padding: 20px;">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 16px 16px 0 0;">
-              <h1 style="margin: 0 0 8px 0; font-size: 28px;">🎯 New Job Matches</h1>
-              <p style="margin: 0; opacity: 0.9; font-size: 16px;">We found ${jobs.length} job${jobs.length > 1 ? 's' : ''} matching your alert</p>
-            </div>
-
-            <!-- Alert Info -->
-            <div style="background: #ffffff; padding: 24px 30px; border-bottom: 1px solid #eee;">
-              <p style="margin: 0; color: #333;">
-                Hi <strong>${userName}</strong> 👋
-              </p>
-              <p style="margin: 12px 0 0 0; color: #666;">
-                Great news! We found new job opportunities matching your alert: <strong>"${alertTitle}"</strong>
-              </p>
-            </div>
-
-            <!-- Job Cards -->
-            <div style="background: #f8f9fa; padding: 24px;">
-              ${jobCardsHtml}
-            </div>
-
-            <!-- Footer -->
-            <div style="background: #1a1a2e; color: #aaa; padding: 30px; text-align: center; border-radius: 0 0 16px 16px;">
-              <p style="margin: 0 0 12px 0; font-size: 14px;">
-                This email was sent by <strong style="color: #667eea;">Velocity</strong>
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #777;">
-                You're receiving this because you have job alerts enabled.<br>
-                Manage your alerts in your Velocity dashboard.
-              </p>
-            </div>
-          </div>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; line-height: 1.5;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding: 32px 40px; border-bottom: 1px solid #e5e5e5;">
+                      <h1 style="margin: 0; color: #333; font-size: 20px; font-weight: 600;">Velocity</h1>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 32px 40px;">
+                      <p style="margin: 0 0 20px 0; color: #333; font-size: 15px;">Hi ${userName},</p>
+                      <p style="margin: 0 0 24px 0; color: #333; font-size: 15px;">
+                        We found <strong>${jobs.length} new job${jobs.length > 1 ? 's' : ''}</strong> matching your alert for <strong>"${alertTitle}"</strong>.
+                      </p>
+                      
+                      <!-- Jobs List -->
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        ${jobListHtml}
+                      </table>
+                      
+                      <p style="margin: 32px 0 0 0; color: #666; font-size: 14px;">
+                        Good luck with your job search!
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 24px 40px; background-color: #f9f9f9; border-top: 1px solid #e5e5e5;">
+                      <p style="margin: 0; color: #888; font-size: 12px;">
+                        You're receiving this email because you set up a job alert on Velocity.<br>
+                        To manage your alerts, visit your dashboard.
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
         </body>
         </html>
-      `
+      `,
+      // Plain text version for email clients that don't support HTML
+      text: `
+Hi ${userName},
+
+We found ${jobs.length} new job${jobs.length > 1 ? 's' : ''} matching your alert for "${alertTitle}":
+
+${jobs.map((job, i) => `${i + 1}. ${job.title} at ${job.company}${job.location ? ` (${job.location})` : ''}\n   Apply: ${job.applyLink}`).join('\n\n')}
+
+Good luck with your job search!
+
+---
+Velocity - Job Search Made Simple
+      `.trim()
     };
 
     const info = await transporter.sendMail(mailOptions);
