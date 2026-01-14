@@ -150,7 +150,7 @@ export const resumeApi = {
   async downloadPdf(resumeId, version = 'enhanced') {
     const user = auth.currentUser
     if (!user) throw new Error('Not authenticated')
-    
+
     const token = await user.getIdToken()
     const response = await fetch(`${API_BASE}/resumes/${resumeId}/download?version=${version}`, {
       method: 'GET',
@@ -158,12 +158,12 @@ export const resumeApi = {
         'Authorization': `Bearer ${token}`
       }
     })
-    
+
     if (!response.ok) {
       const errorData = await response.json()
       throw new Error(errorData.error || 'Failed to download PDF')
     }
-    
+
     return response.blob()
   }
 }
@@ -210,6 +210,49 @@ export const enhanceApi = {
       method: 'POST',
       headers,
       body: JSON.stringify({ resumeText, jobRole })
+    })
+    return handleResponse(response)
+  },
+
+  // Comprehensive resume analysis (Senior Expert Level)
+  async comprehensiveAnalysis(resumeText, jobRole) {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}/enhance/comprehensive-analysis`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ resumeText, jobRole })
+    })
+    return handleResponse(response)
+  },
+
+  // Analyze individual bullet points
+  async analyzeBullets(resumeText, jobRole) {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}/enhance/analyze-bullets`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ resumeText, jobRole })
+    })
+    return handleResponse(response)
+  },
+
+  // Generate before/after comparison
+  async beforeAfter(resumeText, jobRole, analysisResults = {}) {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}/enhance/before-after`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ resumeText, jobRole, analysisResults })
+    })
+    return handleResponse(response)
+  },
+
+  // Get power/weak verb lists
+  async getVerbLists() {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}/enhance/verb-lists`, {
+      method: 'GET',
+      headers
     })
     return handleResponse(response)
   }

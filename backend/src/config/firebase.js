@@ -16,28 +16,51 @@ const firebaseConfig = {
 };
 
 let initialized = false;
+let serviceAccount = null;
 
-// Check if we have a service account file
-if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-  throw new Error("FIREBASE_SERVICE_ACCOUNT env variable not set");
+// Try to load service account from file path first (FIREBASE_SERVICE_ACCOUNT_PATH)
+if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+  try {
+    const serviceAccountPath = join(__dirname, '../../', process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+    if (existsSync(serviceAccountPath)) {
+      serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+      console.log('✅ Loaded service account from file path');
+    } else {
+      // Try as absolute path or relative to backend folder
+      const altPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+      if (existsSync(altPath)) {
+        serviceAccount = JSON.parse(readFileSync(altPath, 'utf8'));
+        console.log('✅ Loaded service account from absolute path');
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Failed to load from FIREBASE_SERVICE_ACCOUNT_PATH:', error.message);
+  }
 }
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_SERVICE_ACCOUNT
-);
 
-try {
-  serviceAccount.private_key =
-    serviceAccount.private_key.replace(/\\n/g, "\n");
-
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-  });
-  initialized = true;
-  console.log('✅ Firebase Admin SDK initialized with service account');
+// Fallback to JSON string in FIREBASE_SERVICE_ACCOUNT env variable
+if (!serviceAccount && process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log('✅ Loaded service account from JSON env variable');
+  } catch (error) {
+    console.warn('⚠️ Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', error.message);
+  }
 }
-catch (error) {
-  console.error('❌ Failed to load service account:', error.message);
+
+if (serviceAccount) {
+  try {
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+    });
+    initialized = true;
+    console.log('✅ Firebase Admin SDK initialized with service account');
+  } catch (error) {
+    console.error('❌ Failed to initialize with service account:', error.message);
+  }
 }
 
 

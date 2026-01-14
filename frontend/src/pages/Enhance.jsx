@@ -4,12 +4,12 @@ import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { resumeApi, enhanceApi } from '../services/api'
 import Navbar from '../components/Navbar'
-import { 
-  Target, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
-  Sparkles, 
+import {
+  Target,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Sparkles,
   ArrowRight,
   BarChart3,
   Zap,
@@ -19,7 +19,15 @@ import {
   ChevronUp,
   Briefcase,
   Award,
-  AlertCircle
+  AlertCircle,
+  Star,
+  GraduationCap,
+  Code,
+  FolderKanban,
+  Lightbulb,
+  ArrowLeftRight,
+  Brain,
+  Edit3
 } from 'lucide-react'
 
 // Score ring component
@@ -27,7 +35,7 @@ const ScoreRing = ({ score, size = 120, strokeWidth = 8 }) => {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (score / 100) * circumference
-  
+
   const getScoreColor = (score) => {
     if (score >= 80) return '#22c55e' // green
     if (score >= 60) return '#eab308' // yellow
@@ -64,7 +72,7 @@ const ScoreRing = ({ score, size = 120, strokeWidth = 8 }) => {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <motion.span 
+        <motion.span
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.3 }}
@@ -108,7 +116,7 @@ const ScoreBar = ({ label, score, delay = 0 }) => {
 // Improvement card
 const ImprovementCard = ({ improvement, index }) => {
   const [expanded, setExpanded] = useState(false)
-  
+
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
       case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30'
@@ -125,7 +133,7 @@ const ImprovementCard = ({ improvement, index }) => {
       transition={{ delay: index * 0.1 }}
       className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-4 hover:border-neutral-600 transition-colors"
     >
-      <div 
+      <div
         className="flex items-start justify-between cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
@@ -144,7 +152,7 @@ const ImprovementCard = ({ improvement, index }) => {
           <ChevronDown className="w-5 h-5 text-neutral-400 ml-2 flex-shrink-0" />
         )}
       </div>
-      
+
       {expanded && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -161,16 +169,199 @@ const ImprovementCard = ({ improvement, index }) => {
   )
 }
 
+// Section Grade Card Component
+const SectionGradeCard = ({ section, data, icon: Icon }) => {
+  const getGradeColor = (grade) => {
+    switch (grade) {
+      case 'A': return 'from-green-500 to-emerald-500'
+      case 'B': return 'from-blue-500 to-cyan-500'
+      case 'C': return 'from-yellow-500 to-orange-400'
+      case 'D': return 'from-orange-500 to-red-400'
+      case 'F': return 'from-red-500 to-red-600'
+      default: return 'from-neutral-500 to-neutral-600'
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-4 hover:border-neutral-600 transition-all"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Icon className="w-5 h-5 text-indigo-400" />
+          <span className="font-medium text-white capitalize">{section}</span>
+        </div>
+        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getGradeColor(data?.grade)} flex items-center justify-center`}>
+          <span className="text-white font-bold text-lg">{data?.grade || 'N/A'}</span>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div className="h-1.5 bg-neutral-700 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${data?.score || 0}%` }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className={`h-full rounded-full bg-gradient-to-r ${getGradeColor(data?.grade)}`}
+          />
+        </div>
+        <p className="text-sm text-neutral-400">{data?.feedback || 'No feedback available'}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+// Bullet Analysis Card Component
+const BulletAnalysisCard = ({ bullet, index }) => {
+  const [expanded, setExpanded] = useState(false)
+
+  const getScoreColor = (score) => {
+    if (score >= 8) return 'text-green-400 bg-green-500/20 border-green-500/30'
+    if (score >= 5) return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30'
+    return 'text-red-400 bg-red-500/20 border-red-500/30'
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="bg-neutral-800/30 border border-neutral-700 rounded-xl p-4 hover:bg-neutral-800/50 transition-all"
+    >
+      <div
+        className="cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <p className="text-neutral-300 text-sm flex-1">{bullet.original}</p>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className={`text-xs px-2 py-1 rounded-lg border ${getScoreColor(bullet.score)}`}>
+              {bullet.score}/10
+            </span>
+            {expanded ? (
+              <ChevronUp className="w-4 h-4 text-neutral-400" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-neutral-400" />
+            )}
+          </div>
+        </div>
+
+        {/* STAR Check indicators */}
+        {bullet.starCheck && (
+          <div className="flex gap-2 mt-2">
+            {['S', 'T', 'A', 'R'].map((letter, i) => {
+              const key = ['hasSituation', 'hasTask', 'hasAction', 'hasResult'][i]
+              const has = bullet.starCheck[key]
+              return (
+                <span
+                  key={letter}
+                  className={`text-xs px-1.5 py-0.5 rounded ${has ? 'bg-green-500/20 text-green-400' : 'bg-neutral-700 text-neutral-500'}`}
+                >
+                  {letter}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {expanded && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mt-4 pt-4 border-t border-neutral-700 space-y-3"
+        >
+          {bullet.issues && bullet.issues.length > 0 && (
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">Issues:</p>
+              <div className="flex flex-wrap gap-1">
+                {bullet.issues.map((issue, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 bg-red-500/10 text-red-400 rounded">
+                    {issue}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs text-indigo-400 font-medium">Improved Version</span>
+            </div>
+            <p className="text-sm text-white">{bullet.improved}</p>
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
+  )
+}
+
+// Senior Tip Card Component
+const SeniorTipCard = ({ tip, index }) => {
+  const getCategoryIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'formatting': return FileText
+      case 'content': return Edit3
+      case 'impact': return Zap
+      case 'keywords': return Code
+      case 'structure': return FolderKanban
+      default: return Lightbulb
+    }
+  }
+
+  const getCategoryColor = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'formatting': return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+      case 'content': return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+      case 'impact': return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+      case 'keywords': return 'bg-green-500/20 text-green-400 border-green-500/30'
+      case 'structure': return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+      default: return 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
+    }
+  }
+
+  const Icon = getCategoryIcon(tip.category)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={`border rounded-xl p-4 ${getCategoryColor(tip.category)}`}
+    >
+      <div className="flex items-start gap-3">
+        <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs opacity-75 capitalize">{tip.category}</span>
+            {tip.priority === 'high' && (
+              <span className="text-xs px-1.5 py-0.5 bg-red-500/30 text-red-300 rounded">High Priority</span>
+            )}
+          </div>
+          <p className="text-sm font-medium">{tip.tip}</p>
+          {tip.example && (
+            <p className="text-xs opacity-75 mt-2 italic">"{tip.example}"</p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function Enhance() {
   const { resumeId } = useParams()
   const navigate = useNavigate()
-  
+
   const [resume, setResume] = useState(null)
   const [loading, setLoading] = useState(true)
   const [analyzing, setAnalyzing] = useState(false)
   const [enhancing, setEnhancing] = useState(false)
   const [atsAnalysis, setAtsAnalysis] = useState(null)
-  
+  const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState(null)
+  const [activeTab, setActiveTab] = useState('overview') // 'overview', 'bullets', 'tips'
+
   // Job role input
   const [jobRole, setJobRole] = useState('')
   const [hasAnalyzed, setHasAnalyzed] = useState(false)
@@ -184,7 +375,7 @@ export default function Enhance() {
     try {
       const response = await resumeApi.getById(resumeId)
       setResume(response.data)
-      
+
       // Pre-fill job role if available
       if (response.data.jobRole) {
         setJobRole(response.data.jobRole)
@@ -205,14 +396,20 @@ export default function Enhance() {
 
     setAnalyzing(true)
     try {
-      const response = await enhanceApi.analyzeATS(resume.originalText, jobRole)
-      setAtsAnalysis(response.data)
+      // Fetch both ATS analysis and comprehensive analysis in parallel
+      const [atsResponse, comprehensiveResponse] = await Promise.all([
+        enhanceApi.analyzeATS(resume.originalText, jobRole),
+        enhanceApi.comprehensiveAnalysis(resume.originalText, jobRole)
+      ])
+
+      setAtsAnalysis(atsResponse.data)
+      setComprehensiveAnalysis(comprehensiveResponse.data)
       setHasAnalyzed(true)
-      
+
       // Save job role to resume
       await resumeApi.update(resumeId, { jobRole })
-      
-      toast.success('ATS analysis complete!')
+
+      toast.success('Senior-level analysis complete!')
     } catch (error) {
       toast.error(error.message || 'Failed to analyze resume')
     } finally {
@@ -235,7 +432,7 @@ export default function Enhance() {
 
       // Call enhance API
       const enhanceResponse = await enhanceApi.enhance(
-        resume.originalText, 
+        resume.originalText,
         apiPreferences
       )
 
@@ -269,7 +466,7 @@ export default function Enhance() {
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
-      
+
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
@@ -278,7 +475,7 @@ export default function Enhance() {
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
@@ -388,12 +585,12 @@ export default function Enhance() {
               >
                 <div className="flex flex-col items-center">
                   <ScoreRing score={atsAnalysis.atsScore} size={160} strokeWidth={12} />
-                  
+
                   <div className="mt-4 text-center">
                     <p className="text-lg font-medium text-white mb-1">
-                      {atsAnalysis.atsScore >= 80 ? 'Excellent!' : 
-                       atsAnalysis.atsScore >= 60 ? 'Good Progress' : 
-                       atsAnalysis.atsScore >= 40 ? 'Needs Work' : 'Major Improvements Needed'}
+                      {atsAnalysis.atsScore >= 80 ? 'Excellent!' :
+                        atsAnalysis.atsScore >= 60 ? 'Good Progress' :
+                          atsAnalysis.atsScore >= 40 ? 'Needs Work' : 'Major Improvements Needed'}
                     </p>
                     <p className="text-sm text-neutral-400">for {jobRole}</p>
                   </div>
@@ -402,6 +599,8 @@ export default function Enhance() {
                     onClick={() => {
                       setHasAnalyzed(false)
                       setAtsAnalysis(null)
+                      setComprehensiveAnalysis(null)
+                      setActiveTab('overview')
                     }}
                     className="mt-4 text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
                   >
@@ -523,6 +722,208 @@ export default function Enhance() {
               </div>
             </motion.div>
 
+            {/* Senior Expert Analysis - Only show if comprehensiveAnalysis is available */}
+            {comprehensiveAnalysis && (
+              <>
+                {/* Tab Navigation */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.55 }}
+                  className="flex items-center justify-center gap-2 bg-neutral-900/50 border border-neutral-800 rounded-xl p-2"
+                >
+                  {[
+                    { id: 'overview', label: 'Section Grades', icon: BarChart3 },
+                    { id: 'bullets', label: 'Bullet Analysis', icon: Edit3 },
+                    { id: 'tips', label: 'Senior Tips', icon: Lightbulb }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
+                        ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                        : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                        }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{tab.label}</span>
+                    </button>
+                  ))}
+                </motion.div>
+
+                {/* Section Grades Tab */}
+                {activeTab === 'overview' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${comprehensiveAnalysis.overallGrade === 'A' ? 'from-green-500 to-emerald-500' :
+                        comprehensiveAnalysis.overallGrade === 'B' ? 'from-blue-500 to-cyan-500' :
+                          comprehensiveAnalysis.overallGrade === 'C' ? 'from-yellow-500 to-orange-400' :
+                            'from-red-500 to-red-600'
+                        } flex items-center justify-center`}>
+                        <span className="text-white font-bold text-2xl">{comprehensiveAnalysis.overallGrade}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-white">Overall Resume Grade</h3>
+                        <p className="text-neutral-400 text-sm">{comprehensiveAnalysis.executiveSummary}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <SectionGradeCard section="Summary" data={comprehensiveAnalysis.sectionGrades?.summary} icon={FileText} />
+                      <SectionGradeCard section="Experience" data={comprehensiveAnalysis.sectionGrades?.experience} icon={Briefcase} />
+                      <SectionGradeCard section="Education" data={comprehensiveAnalysis.sectionGrades?.education} icon={GraduationCap} />
+                      <SectionGradeCard section="Skills" data={comprehensiveAnalysis.sectionGrades?.skills} icon={Code} />
+                      <SectionGradeCard section="Projects" data={comprehensiveAnalysis.sectionGrades?.projects} icon={FolderKanban} />
+                    </div>
+
+                    {/* Action Verb & Quantification Analysis */}
+                    <div className="grid lg:grid-cols-2 gap-4 mt-6">
+                      {/* Action Verb Analysis */}
+                      <div className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-4">
+                        <h4 className="font-medium text-white mb-3 flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-orange-400" />
+                          Action Verb Quality
+                        </h4>
+                        <ScoreBar label="Verb Score" score={comprehensiveAnalysis.actionVerbAnalysis?.verbScore || 0} delay={0.1} />
+                        {comprehensiveAnalysis.actionVerbAnalysis?.powerVerbsUsed?.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-xs text-neutral-500 mb-1">Power verbs used:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {comprehensiveAnalysis.actionVerbAnalysis.powerVerbsUsed.slice(0, 5).map((verb, i) => (
+                                <span key={i} className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 rounded">{verb}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Quantification Analysis */}
+                      <div className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-4">
+                        <h4 className="font-medium text-white mb-3 flex items-center gap-2">
+                          <BarChart3 className="w-4 h-4 text-blue-400" />
+                          Quantification Level
+                        </h4>
+                        <ScoreBar label="Bullets with Metrics" score={comprehensiveAnalysis.quantificationAnalysis?.percentageQuantified || 0} delay={0.2} />
+                        <div className="mt-2 flex gap-4 text-sm">
+                          <span className="text-green-400">{comprehensiveAnalysis.quantificationAnalysis?.bulletsWithMetrics || 0} with metrics</span>
+                          <span className="text-neutral-500">{comprehensiveAnalysis.quantificationAnalysis?.bulletsWithoutMetrics || 0} without</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Bullet Analysis Tab */}
+                {activeTab === 'bullets' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <Edit3 className="w-5 h-5 text-indigo-400" />
+                        Bullet-by-Bullet Analysis
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-neutral-500">Legend:</span>
+                        <span className="flex items-center gap-1 text-xs">
+                          <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">S</span>
+                          <span className="text-neutral-400">Situation</span>
+                        </span>
+                        <span className="flex items-center gap-1 text-xs">
+                          <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">T</span>
+                          <span className="text-neutral-400">Task</span>
+                        </span>
+                        <span className="flex items-center gap-1 text-xs">
+                          <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">A</span>
+                          <span className="text-neutral-400">Action</span>
+                        </span>
+                        <span className="flex items-center gap-1 text-xs">
+                          <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">R</span>
+                          <span className="text-neutral-400">Result</span>
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-neutral-400 mb-4">Click on any bullet to see detailed analysis and AI-improved version</p>
+                    <div className="space-y-3">
+                      {comprehensiveAnalysis.bulletAnalysis?.map((bullet, index) => (
+                        <BulletAnalysisCard key={index} bullet={bullet} index={index} />
+                      ))}
+                      {(!comprehensiveAnalysis.bulletAnalysis || comprehensiveAnalysis.bulletAnalysis.length === 0) && (
+                        <p className="text-neutral-500 text-center py-8">No bullet points analyzed</p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Senior Tips Tab */}
+                {activeTab === 'tips' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                        <Brain className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-white">Senior Resume Expert Tips</h3>
+                        <p className="text-neutral-400 text-sm">Pro advice to make your resume stand out</p>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {comprehensiveAnalysis.seniorTips?.map((tip, index) => (
+                        <SeniorTipCard key={index} tip={tip} index={index} />
+                      ))}
+                    </div>
+
+                    {/* Competitive Edge */}
+                    {comprehensiveAnalysis.competitiveEdge && (
+                      <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border border-amber-500/30 rounded-xl p-6 mt-4">
+                        <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                          <Star className="w-5 h-5 text-amber-400" />
+                          Competitive Edge Score: {comprehensiveAnalysis.competitiveEdge.score}/100
+                        </h4>
+                        {comprehensiveAnalysis.competitiveEdge.standoutFactors?.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs text-neutral-400 mb-2">What makes you stand out:</p>
+                            <ul className="space-y-1">
+                              {comprehensiveAnalysis.competitiveEdge.standoutFactors.map((factor, i) => (
+                                <li key={i} className="text-sm text-amber-300 flex items-start gap-2">
+                                  <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                  {factor}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {comprehensiveAnalysis.competitiveEdge.differentiators?.length > 0 && (
+                          <div>
+                            <p className="text-xs text-neutral-400 mb-2">To stand out even more:</p>
+                            <ul className="space-y-1">
+                              {comprehensiveAnalysis.competitiveEdge.differentiators.map((diff, i) => (
+                                <li key={i} className="text-sm text-white/80 flex items-start gap-2">
+                                  <ArrowRight className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+                                  {diff}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </>
+            )}
+
             {/* Enhance with AI Button */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -559,7 +960,7 @@ export default function Enhance() {
                   )}
                 </button>
               </div>
-              
+
               {enhancing && (
                 <div className="mt-4 text-center">
                   <p className="text-sm text-neutral-400">

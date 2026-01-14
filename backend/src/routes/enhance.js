@@ -1,5 +1,5 @@
 import express from 'express';
-import { enhanceResume, generateSummary, suggestImprovements, analyzeATSScore } from '../config/langchain.js';
+import { enhanceResume, generateSummary, suggestImprovements, analyzeATSScore, analyzeResumeComprehensive, analyzeBulletPoints, generateBeforeAfter, getVerbLists } from '../config/langchain.js';
 import { verifyToken } from '../middleware/auth.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 
@@ -28,7 +28,7 @@ router.post('/', verifyToken, asyncHandler(async (req, res) => {
 
   try {
     const result = await enhanceResume(resumeText, validatedPreferences);
-    
+
     res.json({
       success: true,
       data: {
@@ -57,7 +57,7 @@ router.post('/summary', verifyToken, asyncHandler(async (req, res) => {
 
   try {
     const result = await generateSummary(resumeText, jobRole);
-    
+
     res.json({
       success: true,
       data: {
@@ -84,7 +84,7 @@ router.post('/suggestions', verifyToken, asyncHandler(async (req, res) => {
 
   try {
     const result = await suggestImprovements(resumeText, jobRole);
-    
+
     res.json({
       success: true,
       data: {
@@ -111,7 +111,7 @@ router.post('/ats-analysis', verifyToken, asyncHandler(async (req, res) => {
 
   try {
     const result = await analyzeATSScore(resumeText, jobRole);
-    
+
     res.json({
       success: true,
       data: result.analysis
@@ -120,6 +120,91 @@ router.post('/ats-analysis', verifyToken, asyncHandler(async (req, res) => {
     console.error('ATS analysis error:', error);
     throw new ApiError(500, 'Failed to analyze ATS score. Please try again.');
   }
+}));
+
+// Comprehensive resume analysis (Senior Expert Level)
+router.post('/comprehensive-analysis', verifyToken, asyncHandler(async (req, res) => {
+  const { resumeText, jobRole } = req.body;
+
+  if (!resumeText || !resumeText.trim()) {
+    throw new ApiError(400, 'Resume text is required');
+  }
+
+  if (!jobRole) {
+    throw new ApiError(400, 'Job role is required');
+  }
+
+  try {
+    const result = await analyzeResumeComprehensive(resumeText, jobRole);
+
+    res.json({
+      success: true,
+      data: result.analysis
+    });
+  } catch (error) {
+    console.error('Comprehensive analysis error:', error);
+    throw new ApiError(500, 'Failed to perform comprehensive analysis. Please try again.');
+  }
+}));
+
+// Analyze individual bullet points
+router.post('/analyze-bullets', verifyToken, asyncHandler(async (req, res) => {
+  const { resumeText, jobRole } = req.body;
+
+  if (!resumeText || !resumeText.trim()) {
+    throw new ApiError(400, 'Resume text is required');
+  }
+
+  if (!jobRole) {
+    throw new ApiError(400, 'Job role is required');
+  }
+
+  try {
+    const result = await analyzeBulletPoints(resumeText, jobRole);
+
+    res.json({
+      success: true,
+      data: result.analysis
+    });
+  } catch (error) {
+    console.error('Bullet analysis error:', error);
+    throw new ApiError(500, 'Failed to analyze bullet points. Please try again.');
+  }
+}));
+
+// Generate before/after comparison
+router.post('/before-after', verifyToken, asyncHandler(async (req, res) => {
+  const { resumeText, jobRole, analysisResults } = req.body;
+
+  if (!resumeText || !resumeText.trim()) {
+    throw new ApiError(400, 'Resume text is required');
+  }
+
+  if (!jobRole) {
+    throw new ApiError(400, 'Job role is required');
+  }
+
+  try {
+    const result = await generateBeforeAfter(resumeText, jobRole, analysisResults || {});
+
+    res.json({
+      success: true,
+      data: result.comparison
+    });
+  } catch (error) {
+    console.error('Before/after generation error:', error);
+    throw new ApiError(500, 'Failed to generate comparison. Please try again.');
+  }
+}));
+
+// Get power/weak verb lists
+router.get('/verb-lists', verifyToken, asyncHandler(async (req, res) => {
+  const verbs = getVerbLists();
+
+  res.json({
+    success: true,
+    data: verbs
+  });
 }));
 
 export default router;
