@@ -2,18 +2,17 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { communityApi } from '../services/api';
-import Navbar from '../components/Navbar';
 import ChannelList from '../components/community/ChannelList';
 import ChatWindow from '../components/community/ChatWindow';
 import MembersList from '../components/community/MembersList';
 import PostsFeed from '../components/community/PostsFeed';
 import DirectMessages from '../components/community/DirectMessages';
-import { 
-  MessageSquare, 
-  Users, 
-  FileText, 
-  Mail, 
-  Menu, 
+import {
+  MessageSquare,
+  Users,
+  FileText,
+  Mail,
+  Menu,
   X,
   Plus,
   Search,
@@ -24,19 +23,19 @@ import toast from 'react-hot-toast';
 export default function Community() {
   const { user } = useAuth();
   const { isConnected, onlineUsers, subscribe, joinChannel, leaveChannel } = useSocket();
-  
+
   // View state
   const [activeView, setActiveView] = useState('channels'); // channels, posts, dms
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [membersOpen, setMembersOpen] = useState(true);
-  
+
   // Channel state
   const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loadingChannels, setLoadingChannels] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
-  
+
   // Modal state
   const [showCreateChannel, setShowCreateChannel] = useState(false);
 
@@ -46,7 +45,7 @@ export default function Community() {
     // Update channel's last message
     setChannels(prev => prev.map(ch => {
       const chId = ch.id || ch._id;
-      return chId === optimisticMessage.channelId 
+      return chId === optimisticMessage.channelId
         ? { ...ch, lastMessage: { content: optimisticMessage.content, senderName: optimisticMessage.sender.name, timestamp: optimisticMessage.createdAt } }
         : ch;
     }));
@@ -57,10 +56,10 @@ export default function Community() {
     setMessages(prev => prev.map(msg => {
       const msgId = msg.id || msg._id;
       if (msgId !== messageId) return msg;
-      
+
       let reactions = [...(msg.reactions || [])];
       const reactionIndex = reactions.findIndex(r => r.emoji === emoji);
-      
+
       if (action === 'add') {
         if (reactionIndex >= 0) {
           // Add user to existing reaction
@@ -89,7 +88,7 @@ export default function Community() {
           }
         }
       }
-      
+
       return { ...msg, reactions };
     }));
   }, [user]);
@@ -98,7 +97,7 @@ export default function Community() {
   const handleOptimisticEdit = useCallback(({ messageId, content }) => {
     setMessages(prev => prev.map(msg => {
       const msgId = msg.id || msg._id;
-      return msgId === messageId 
+      return msgId === messageId
         ? { ...msg, content, isEdited: true, editedAt: new Date().toISOString() }
         : msg;
     }));
@@ -119,9 +118,9 @@ export default function Community() {
       // Check if this is a confirmation of our optimistic message
       if (data.tempId) {
         // Replace optimistic message with confirmed one
-        setMessages(prev => prev.map(msg => 
-          (msg.id === data.tempId || msg._id === data.tempId) 
-            ? { ...data, isOptimistic: false } 
+        setMessages(prev => prev.map(msg =>
+          (msg.id === data.tempId || msg._id === data.tempId)
+            ? { ...data, isOptimistic: false }
             : msg
         ));
       } else if (data.sender?.uid !== user?.uid) {
@@ -132,7 +131,7 @@ export default function Community() {
     // Update channel's last message
     setChannels(prev => prev.map(ch => {
       const chId = ch.id || ch._id;
-      return chId === data.channelId 
+      return chId === data.channelId
         ? { ...ch, lastMessage: { content: data.content, senderName: data.sender.name, timestamp: data.createdAt } }
         : ch;
     }));
@@ -154,9 +153,9 @@ export default function Community() {
   const handleMessageConfirmed = useCallback((data) => {
     const channelId = activeChannel?.id || activeChannel?._id;
     if (data.channelId === channelId && data.tempId) {
-      setMessages(prev => prev.map(msg => 
-        (msg.id === data.tempId || msg._id === data.tempId) 
-          ? { ...data, isOptimistic: false } 
+      setMessages(prev => prev.map(msg =>
+        (msg.id === data.tempId || msg._id === data.tempId)
+          ? { ...data, isOptimistic: false }
           : msg
       ));
     }
@@ -258,9 +257,8 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
-      <div className="h-[calc(100vh-64px)] flex pt-16">
+    <div className="h-full bg-black">
+      <div className="h-full flex">
         {/* Left Sidebar - Channels/Navigation */}
         <div className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-neutral-900 border-r border-neutral-800 flex flex-col transition-all duration-300 overflow-hidden`}>
           {/* View Tabs */}
@@ -268,27 +266,24 @@ export default function Community() {
             <div className="flex gap-1 bg-neutral-800 p-1 rounded-lg">
               <button
                 onClick={() => setActiveView('channels')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeView === 'channels' ? 'bg-neutral-700 text-white shadow-sm' : 'text-neutral-400 hover:text-white'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-colors ${activeView === 'channels' ? 'bg-neutral-700 text-white shadow-sm' : 'text-neutral-400 hover:text-white'
+                  }`}
               >
                 <MessageSquare className="w-4 h-4" />
                 <span className="hidden lg:inline">Chat</span>
               </button>
               <button
                 onClick={() => setActiveView('posts')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeView === 'posts' ? 'bg-neutral-700 text-white shadow-sm' : 'text-neutral-400 hover:text-white'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-colors ${activeView === 'posts' ? 'bg-neutral-700 text-white shadow-sm' : 'text-neutral-400 hover:text-white'
+                  }`}
               >
                 <FileText className="w-4 h-4" />
                 <span className="hidden lg:inline">Posts</span>
               </button>
               <button
                 onClick={() => setActiveView('dms')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeView === 'dms' ? 'bg-neutral-700 text-white shadow-sm' : 'text-neutral-400 hover:text-white'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-colors ${activeView === 'dms' ? 'bg-neutral-700 text-white shadow-sm' : 'text-neutral-400 hover:text-white'
+                  }`}
               >
                 <Mail className="w-4 h-4" />
                 <span className="hidden lg:inline">DMs</span>

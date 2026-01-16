@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Search, 
-  MapPin, 
-  Briefcase, 
-  Clock, 
-  DollarSign, 
-  Building2, 
-  ExternalLink, 
-  Bookmark, 
+import {
+  Search,
+  MapPin,
+  Briefcase,
+  Clock,
+  DollarSign,
+  Building2,
+  ExternalLink,
+  Bookmark,
   BookmarkCheck,
   Filter,
   X,
@@ -21,7 +21,6 @@ import {
   Sparkles
 } from 'lucide-react'
 import { jobsApi, jobTrackerApi } from '../services/api'
-import Navbar from '../components/Navbar'
 import Button from '../components/Button'
 
 const JOB_TYPES = ['All Types', 'Full-time', 'Part-time', 'Contract', 'Internship', 'Remote']
@@ -77,7 +76,7 @@ export default function JobSearch() {
     try {
       const response = await jobsApi.search(searchQuery, filters)
       setJobs(response.data || [])
-      
+
       if (response.data?.length === 0) {
         toast('No jobs found. Try different keywords.', { icon: '🔍' })
       } else {
@@ -100,7 +99,7 @@ export default function JobSearch() {
 
   const handleSaveJob = async (job) => {
     const jobId = job.job_id || job.id
-    
+
     if (savedJobs.has(jobId)) {
       toast('Job already saved to tracker', { icon: '📌' })
       return
@@ -118,7 +117,7 @@ export default function JobSearch() {
         description: job.job_description || job.description,
         status: 'saved'
       })
-      
+
       setSavedJobs(prev => new Set([...prev, jobId]))
       toast.success('Job saved to tracker!')
     } catch (error) {
@@ -142,7 +141,7 @@ export default function JobSearch() {
     const now = new Date()
     const diffTime = Math.abs(now - date)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays === 0) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     if (diffDays < 7) return `${diffDays} days ago`
@@ -152,17 +151,14 @@ export default function JobSearch() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-      
-      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
       </div>
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Header Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
@@ -180,7 +176,7 @@ export default function JobSearch() {
         </motion.div>
 
         {/* Search Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -216,11 +212,10 @@ export default function JobSearch() {
                 <button
                   type="button"
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-4 rounded-xl border transition-all cursor-pointer ${
-                    showFilters
+                  className={`px-4 py-4 rounded-xl border transition-all cursor-pointer ${showFilters
                       ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400'
                       : 'bg-neutral-800/50 border-neutral-700 text-neutral-400 hover:bg-neutral-800'
-                  }`}
+                    }`}
                 >
                   <Filter className="w-5 h-5" />
                 </button>
@@ -318,7 +313,7 @@ export default function JobSearch() {
             <p className="text-neutral-400 mt-4">Searching for opportunities...</p>
           </div>
         ) : hasSearched && jobs.length === 0 ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-20"
@@ -366,8 +361,8 @@ export default function JobSearch() {
                         {/* Company Logo */}
                         <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-neutral-700">
                           {job.employer_logo ? (
-                            <img 
-                              src={job.employer_logo} 
+                            <img
+                              src={job.employer_logo}
                               alt={job.employer_name}
                               className="w-10 h-10 object-contain rounded"
                               onError={(e) => {
@@ -386,7 +381,7 @@ export default function JobSearch() {
                           <p className="text-neutral-400 font-medium">
                             {job.employer_name || job.company}
                           </p>
-                          
+
                           {/* Job Meta */}
                           <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-neutral-500">
                             <span className="flex items-center gap-1">
@@ -418,7 +413,7 @@ export default function JobSearch() {
                           {job.job_required_skills && job.job_required_skills.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-3">
                               {job.job_required_skills.slice(0, 5).map((skill, i) => (
-                                <span 
+                                <span
                                   key={i}
                                   className="px-2 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-md text-xs font-medium"
                                 >
@@ -434,11 +429,10 @@ export default function JobSearch() {
                       <div className="flex flex-col gap-2 ml-4">
                         <button
                           onClick={() => handleSaveJob(job)}
-                          className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                            savedJobs.has(job.job_id || job.id)
+                          className={`p-2 rounded-lg transition-colors cursor-pointer ${savedJobs.has(job.job_id || job.id)
                               ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
                               : 'bg-neutral-800 text-neutral-500 hover:bg-indigo-500/20 hover:text-indigo-400 border border-neutral-700'
-                          }`}
+                            }`}
                           title={savedJobs.has(job.job_id || job.id) ? 'Saved' : 'Save to tracker'}
                         >
                           {savedJobs.has(job.job_id || job.id) ? (
@@ -469,7 +463,7 @@ export default function JobSearch() {
           </motion.div>
         ) : (
           /* Initial State - No Search Yet */
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}

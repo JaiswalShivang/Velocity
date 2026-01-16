@@ -21,7 +21,6 @@ import {
   GraduationCap
 } from 'lucide-react'
 import { resumeApi, jobTrackerApi } from '../services/api'
-import Navbar from '../components/Navbar'
 import Button from '../components/Button'
 
 const STATUS_CONFIG = {
@@ -95,9 +94,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-
-      {/* Background Effects - Subtle */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-slate-500/5 rounded-full blur-3xl" />

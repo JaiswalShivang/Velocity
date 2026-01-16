@@ -3,14 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import { resumeApi } from '../services/api'
-import Navbar from '../components/Navbar'
 import Button from '../components/Button'
 import Card from '../components/Card'
 
 export default function ResumeView() {
   const { resumeId } = useParams()
   const navigate = useNavigate()
-  
+
   const [resume, setResume] = useState(null)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
@@ -24,7 +23,7 @@ export default function ResumeView() {
     try {
       const response = await resumeApi.getById(resumeId)
       setResume(response.data)
-      
+
       // Set default tab based on available content
       if (!response.data.enhancedText) {
         setActiveTab('original')
@@ -46,7 +45,7 @@ export default function ResumeView() {
     try {
       setDownloading(true)
       const blob = await resumeApi.downloadPdf(resumeId, activeTab)
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -54,11 +53,11 @@ export default function ResumeView() {
       a.download = `${resume?.title || 'resume'}_${activeTab}.pdf`
       document.body.appendChild(a)
       a.click()
-      
+
       // Cleanup
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      
+
       toast.success('PDF downloaded successfully!')
     } catch (error) {
       toast.error(error.message || 'Failed to download PDF')
@@ -80,7 +79,6 @@ export default function ResumeView() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black">
-        <Navbar />
         <div className="flex items-center justify-center py-20">
           <div className="flex items-center gap-3 text-neutral-400">
             <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -93,8 +91,6 @@ export default function ResumeView() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-      
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
@@ -125,22 +121,20 @@ export default function ResumeView() {
             {resume?.enhancedText && (
               <button
                 onClick={() => setActiveTab('enhanced')}
-                className={`pb-4 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-                  activeTab === 'enhanced'
+                className={`pb-4 text-sm font-medium border-b-2 transition-colors cursor-pointer ${activeTab === 'enhanced'
                     ? 'border-indigo-500 text-indigo-400'
                     : 'border-transparent text-neutral-500 hover:text-neutral-300'
-                }`}
+                  }`}
               >
                 Enhanced Version
               </button>
             )}
             <button
               onClick={() => setActiveTab('original')}
-              className={`pb-4 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-                activeTab === 'original'
+              className={`pb-4 text-sm font-medium border-b-2 transition-colors cursor-pointer ${activeTab === 'original'
                   ? 'border-indigo-500 text-indigo-400'
                   : 'border-transparent text-neutral-500 hover:text-neutral-300'
-              }`}
+                }`}
             >
               Original Version
             </button>
@@ -154,18 +148,18 @@ export default function ResumeView() {
               {activeTab === 'enhanced' ? 'AI-Enhanced Resume' : 'Original Resume'}
             </h2>
             <div className="flex gap-2">
-              <Button 
+              <Button
                 variant="primary"
                 onClick={handleDownloadPdf}
                 disabled={downloading}
               >
                 {downloading ? 'Downloading...' : 'Download PDF'}
               </Button>
-              <Button 
+              <Button
                 variant="secondary"
                 onClick={() => handleCopy(
-                  activeTab === 'enhanced' 
-                    ? resume?.enhancedText 
+                  activeTab === 'enhanced'
+                    ? resume?.enhancedText
                     : resume?.originalText
                 )}
               >
@@ -173,55 +167,55 @@ export default function ResumeView() {
               </Button>
             </div>
           </div>
-          
+
           <div className="bg-white border border-neutral-300 rounded-lg p-6 min-h-96 overflow-auto shadow-lg" style={{ maxWidth: '210mm', margin: '0 auto' }}>
             {activeTab === 'enhanced' && resume?.enhancedText ? (
               <div className="resume-preview max-w-none text-black text-sm leading-tight">
                 <ReactMarkdown
                   components={{
-                    h1: ({node, ...props}) => (
+                    h1: ({ node, ...props }) => (
                       <div className="text-black text-center py-2 px-4 mb-1 text-2xl font-bold border-b-2 border-black">
                         {props.children}
                       </div>
                     ),
-                    h2: ({node, ...props}) => (
+                    h2: ({ node, ...props }) => (
                       <h2 className="text-xs font-bold text-black border-b border-black pb-0.5 mt-3 mb-1 uppercase tracking-wide">
                         {props.children}
                       </h2>
                     ),
-                    h3: ({node, ...props}) => (
+                    h3: ({ node, ...props }) => (
                       <h3 className="text-xs font-bold text-black mt-1.5 mb-0.5">
                         {props.children}
                       </h3>
                     ),
-                    p: ({node, ...props}) => (
+                    p: ({ node, ...props }) => (
                       <p className="text-xs text-gray-800 mb-0.5 leading-snug">
                         {props.children}
                       </p>
                     ),
-                    ul: ({node, ...props}) => (
+                    ul: ({ node, ...props }) => (
                       <ul className="list-none pl-0 space-y-0 mb-1">
                         {props.children}
                       </ul>
                     ),
-                    li: ({node, ...props}) => (
+                    li: ({ node, ...props }) => (
                       <li className="text-xs text-gray-800 flex items-start gap-1 leading-snug">
                         <span className="text-gray-600">◦</span>
                         <span>{props.children}</span>
                       </li>
                     ),
-                    strong: ({node, ...props}) => (
+                    strong: ({ node, ...props }) => (
                       <strong className="font-bold text-black">
                         {props.children}
                       </strong>
                     ),
-                    em: ({node, ...props}) => (
+                    em: ({ node, ...props }) => (
                       <em className="text-gray-600 text-xs font-normal">
                         {props.children}
                       </em>
                     ),
                     hr: () => null,
-                    a: ({node, ...props}) => (
+                    a: ({ node, ...props }) => (
                       <a className="text-blue-600 hover:underline text-xs" href={props.href} target="_blank" rel="noopener noreferrer">
                         {props.children}
                       </a>

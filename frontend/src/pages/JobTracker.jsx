@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { Briefcase, MapPin, DollarSign, Calendar, Trash2, ExternalLink, Plus, Filter } from 'lucide-react'
 import Layout from '../components/Layout'
-import Navbar from '../components/Navbar'
 import { jobTrackerApi } from '../services/api'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -53,13 +52,13 @@ const JobTracker = () => {
     try {
       setUpdateLoading(prev => ({ ...prev, [jobId]: true }))
       await jobTrackerApi.updateStatus(jobId, newStatus)
-      
+
       setTrackedJobs(prev =>
         prev.map(job =>
           job.id === jobId ? { ...job, status: newStatus, updatedAt: new Date() } : job
         )
       )
-      
+
       toast.success('Status updated!')
       fetchStats()
     } catch (error) {
@@ -118,8 +117,7 @@ const JobTracker = () => {
 
   return (
     <Layout>
-      <Navbar />
-      <div className="min-h-screen bg-black py-12 px-4">
+      <div className="min-h-screen bg-black py-8 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -182,11 +180,10 @@ const JobTracker = () => {
           <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => setFilterStatus('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterStatus === 'all'
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'all'
                   ? 'bg-indigo-500 text-white'
                   : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-              }`}
+                }`}
             >
               All Jobs
             </button>
@@ -194,11 +191,10 @@ const JobTracker = () => {
               <button
                 key={status.value}
                 onClick={() => setFilterStatus(status.value)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  filterStatus === status.value
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === status.value
                     ? 'bg-indigo-500 text-white'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                }`}
+                  }`}
               >
                 {status.icon} {status.label}
               </button>
@@ -214,7 +210,7 @@ const JobTracker = () => {
                   {filterStatus === 'all' ? 'No Tracked Jobs Yet' : `No ${getStatusInfo(filterStatus).label} Jobs`}
                 </h3>
                 <p className="text-neutral-400 mb-6">
-                  {filterStatus === 'all' 
+                  {filterStatus === 'all'
                     ? 'Start tracking jobs from the job search page'
                     : `You don't have any jobs with "${getStatusInfo(filterStatus).label}" status`}
                 </p>

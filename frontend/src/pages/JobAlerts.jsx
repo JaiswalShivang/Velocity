@@ -17,7 +17,6 @@ import {
 import toast from 'react-hot-toast';
 import { jobAlertsApi, jobsApi } from '../services/api';
 import { JobAlertModal, JobAlertsList } from '../components';
-import Navbar from '../components/Navbar';
 
 export default function JobAlerts() {
     const [activeTab, setActiveTab] = useState('alerts'); // 'alerts' | 'search' | 'matches'
@@ -70,9 +69,6 @@ export default function JobAlerts() {
 
     return (
         <div className="min-h-screen bg-black">
-            <Navbar />
-            
-            {/* Background Effects */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
                 <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
@@ -134,8 +130,8 @@ export default function JobAlerts() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-medium transition-all cursor-pointer ${activeTab === tab.id
-                                    ? 'bg-neutral-900 text-white border border-neutral-800 border-b-transparent'
-                                    : 'bg-neutral-800/50 text-neutral-400 hover:text-white border border-transparent'
+                                ? 'bg-neutral-900 text-white border border-neutral-800 border-b-transparent'
+                                : 'bg-neutral-800/50 text-neutral-400 hover:text-white border border-transparent'
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />

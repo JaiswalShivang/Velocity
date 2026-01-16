@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { uploadApi, resumeApi } from '../services/api'
-import Navbar from '../components/Navbar'
 import FileUpload from '../components/FileUpload'
 import { FileText, Upload as UploadIcon, CheckCircle, Target, BarChart3, Zap } from 'lucide-react'
 
 export default function Upload() {
   const navigate = useNavigate()
-  
+
   const [_file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [uploadComplete, setUploadComplete] = useState(false)
@@ -17,27 +16,27 @@ export default function Upload() {
   const handleFileSelect = async (selectedFile) => {
     setFile(selectedFile)
     setLoading(true)
-    
+
     try {
       // Upload and extract text
       const response = await uploadApi.uploadPdf(selectedFile)
       const extractedText = response.data.extractedText
-      
+
       // Create resume automatically
       const resumeTitle = `Resume - ${new Date().toLocaleDateString()}`
       const resumeResponse = await resumeApi.create({
         originalText: extractedText,
         title: resumeTitle
       })
-      
+
       setUploadComplete(true)
       toast.success('Resume uploaded successfully!')
-      
+
       // Redirect to enhance page after a brief delay
       setTimeout(() => {
         navigate(`/enhance/${resumeResponse.data.id}`)
       }, 1500)
-      
+
     } catch (error) {
       toast.error(error.message || 'Failed to upload resume')
       setFile(null)
@@ -48,17 +47,14 @@ export default function Upload() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-      
-      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
       </div>
-      
+
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 text-center"
@@ -74,7 +70,7 @@ export default function Upload() {
         </motion.div>
 
         {/* Features Preview */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -111,7 +107,7 @@ export default function Upload() {
 
         {/* Upload Section */}
         {!uploadComplete ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -126,7 +122,7 @@ export default function Upload() {
                 <p className="text-sm text-neutral-500">We'll extract and analyze your resume automatically</p>
               </div>
             </div>
-            <FileUpload 
+            <FileUpload
               onFileSelect={handleFileSelect}
               disabled={loading}
             />
@@ -144,7 +140,7 @@ export default function Upload() {
             )}
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="rounded-xl bg-neutral-900/50 border border-green-500/30 p-8 text-center"
@@ -175,7 +171,7 @@ export default function Upload() {
         )}
 
         {/* How it works */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}

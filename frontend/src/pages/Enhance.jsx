@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { resumeApi, enhanceApi } from '../services/api'
-import Navbar from '../components/Navbar'
 import {
   Target,
   TrendingUp,
@@ -455,7 +454,6 @@ export default function Enhance() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black">
-        <Navbar />
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         </div>
@@ -465,9 +463,6 @@ export default function Enhance() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-
-      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />

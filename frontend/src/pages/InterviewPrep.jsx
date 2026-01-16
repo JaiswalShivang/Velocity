@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mic, MicOff, Video, VideoOff, XCircle, CheckCircle, AlertCircle, Volume2, VolumeX, RotateCcw, UserX, Loader2, Sparkles, ArrowRight, Target, TrendingUp, MessageSquare, Eye, Brain, Award, ChevronDown, ChevronUp, Clock, BarChart3, Lightbulb, Zap } from 'lucide-react';
-import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 import { interviewApi } from '../services/api';
 
@@ -470,7 +469,6 @@ export default function InterviewPrep() {
   if (step === 'setup') {
     return (
       <div className="min-h-screen bg-black">
-        <Navbar />
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
@@ -570,7 +568,6 @@ export default function InterviewPrep() {
 
     return (
       <div className="min-h-screen bg-black">
-        <Navbar />
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl" />
         </div>
@@ -725,7 +722,6 @@ export default function InterviewPrep() {
 
     return (
       <div className="min-h-screen bg-black">
-        <Navbar />
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-emerald-500/8 rounded-full blur-3xl" />
           <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-indigo-500/8 rounded-full blur-3xl" />
