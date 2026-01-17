@@ -1,9 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mic, MicOff, Video, VideoOff, XCircle, CheckCircle, AlertCircle, Volume2, VolumeX, RotateCcw, UserX, Loader2, Sparkles, ArrowRight, Target, TrendingUp, MessageSquare, Eye, Brain, Award, ChevronDown, ChevronUp, Clock, BarChart3, Lightbulb, Zap } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, XCircle, CheckCircle, AlertCircle, Volume2, VolumeX, RotateCcw, UserX, Loader2, Sparkles, ArrowRight, Target, TrendingUp, MessageSquare, Eye, Brain, Award, ChevronDown, ChevronUp, Clock, BarChart3, Lightbulb, Zap, Laptop, Smartphone, Chrome, AlertTriangle } from 'lucide-react';
 import Button from '../components/Button';
 import { interviewApi } from '../services/api';
+
+// Device and browser detection utilities
+const isMobileDevice = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  // Check for mobile user agents
+  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i;
+  // Also check screen width as fallback
+  const isMobileWidth = window.innerWidth <= 768;
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  return mobileRegex.test(userAgent.toLowerCase()) || (isMobileWidth && isTouchDevice);
+};
+
+const isChromeBrowser = () => {
+  const userAgent = navigator.userAgent;
+  // Check for Chrome but not Edge (which also contains Chrome in UA)
+  const isChrome = /Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor);
+  const isEdge = /Edg/.test(userAgent);
+  return isChrome && !isEdge;
+};
 
 const INDUSTRIES = [
   { value: 'software_engineering', label: 'Software Engineering' },
@@ -134,9 +153,20 @@ function QuestionAnalysisCard({ answer, index }) {
 
 export default function InterviewPrep() {
   const navigate = useNavigate();
-  const [step, setStep] = useState('setup');
+  const [step, setStep] = useState('setup'); // 'setup', 'av-check', 'interview', 'feedback'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Device/browser compatibility state
+  const [isMobile, setIsMobile] = useState(false);
+  const [isChrome, setIsChrome] = useState(true);
+
+  // A/V confirmation state
+  const [avConfirmed, setAvConfirmed] = useState(false);
+  const [avCheckStream, setAvCheckStream] = useState(null);
+  const [avVideoWorking, setAvVideoWorking] = useState(false);
+  const [avAudioWorking, setAvAudioWorking] = useState(false);
+  const avVideoRef = useRef(null);
 
   const [formData, setFormData] = useState({
     jobRole: '',
@@ -171,6 +201,17 @@ export default function InterviewPrep() {
   const transcriptRef = useRef('');
   const isRecordingRef = useRef(false);
 
+  // Check device and browser on mount
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+    setIsChrome(isChromeBrowser());
+
+    // Re-check on resize
+    const handleResize = () => setIsMobile(isMobileDevice());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     if (step === 'interview') initializeMedia();
     return () => {
@@ -178,6 +219,14 @@ export default function InterviewPrep() {
       if (synthRef.current) synthRef.current.cancel();
     };
   }, [step]);
+
+  // Cleanup AV check stream when moving to interview
+  useEffect(() => {
+    if (step !== 'av-check' && avCheckStream) {
+      avCheckStream.getTracks().forEach(track => track.stop());
+      setAvCheckStream(null);
+    }
+  }, [step, avCheckStream]);
 
   useEffect(() => {
     if (step === 'interview' && questions.length > 0) {
@@ -307,6 +356,49 @@ export default function InterviewPrep() {
     }
   };
 
+  // Initialize A/V check - get camera/mic access before interview
+  const initializeAVCheck = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: 'user' },
+        audio: true
+      });
+      setAvCheckStream(stream);
+      setAvVideoWorking(true);
+      setAvAudioWorking(true);
+
+      // Connect to video element
+      if (avVideoRef.current) {
+        avVideoRef.current.srcObject = stream;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('A/V check failed:', err);
+      setAvVideoWorking(false);
+      setAvAudioWorking(false);
+      setError('Could not access camera/microphone. Please allow access and try again.');
+      return false;
+    }
+  };
+
+  // Confirm A/V is working and start the actual interview
+  const confirmAVAndStart = () => {
+    if (!avVideoWorking || !avAudioWorking) {
+      setError('Please ensure both camera and microphone are working before continuing.');
+      return;
+    }
+
+    // Stop the AV check stream - it will be re-initialized in interview step
+    if (avCheckStream) {
+      avCheckStream.getTracks().forEach(track => track.stop());
+      setAvCheckStream(null);
+    }
+
+    setAvConfirmed(true);
+    setStep('interview');
+  };
+
   const handleStartInterview = async (e) => {
     e.preventDefault();
     if (!formData.jobRole.trim()) {
@@ -322,7 +414,12 @@ export default function InterviewPrep() {
       setInterviewId(response.data.interviewId);
       setQuestions(response.data.questions);
       setAnswersSubmitted([]);
-      setStep('interview');
+
+      // Go to A/V check step first
+      setStep('av-check');
+
+      // Initialize A/V check
+      await initializeAVCheck();
     } catch (err) {
       setError(err.message || 'Failed to start interview');
     } finally {
@@ -465,6 +562,196 @@ export default function InterviewPrep() {
     setExpressionSamples([]);
     setAnswersSubmitted([]);
   };
+
+  // Mobile device block - show message if on phone/tablet
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-0 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative max-w-md w-full text-center"
+        >
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8">
+            <div className="w-20 h-20 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Smartphone className="w-10 h-10 text-red-400" />
+            </div>
+
+            <h1 className="text-2xl font-bold text-white mb-3">Laptop Only</h1>
+            <p className="text-neutral-400 mb-6">
+              AI Interview Prep is currently only supported on laptops and desktop computers.
+            </p>
+
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-3">
+                <Laptop className="w-6 h-6 text-amber-400 flex-shrink-0" />
+                <p className="text-amber-300 text-sm text-left">
+                  Please open this page on a laptop or desktop computer with a webcam and microphone.
+                </p>
+              </div>
+            </div>
+
+            <Button variant="outline" onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // A/V Check step - confirm camera and microphone before interview
+  if (step === 'av-check') {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm mb-4">
+              <AlertTriangle className="w-4 h-4" />
+              Equipment Check Required
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Confirm Your Setup</h1>
+            <p className="text-neutral-400">Please verify your camera and microphone are working before starting</p>
+          </motion.div>
+
+          {/* Chrome Warning */}
+          {!isChrome && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4"
+            >
+              <div className="flex items-start gap-3">
+                <Chrome className="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-amber-300 font-medium">Chrome Browser Recommended</p>
+                  <p className="text-amber-400/70 text-sm mt-1">
+                    For the best experience, please use Google Chrome. Speech recognition may not work properly in other browsers.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Video Preview */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 mb-6"
+          >
+            <div className="relative aspect-video bg-black rounded-xl overflow-hidden mb-6">
+              <video
+                ref={avVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              {!avVideoWorking && (
+                <div className="absolute inset-0 flex items-center justify-center bg-neutral-900">
+                  <div className="text-center">
+                    <VideoOff className="w-12 h-12 text-neutral-600 mx-auto mb-2" />
+                    <p className="text-neutral-500">Camera not detected</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* A/V Status Indicators */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className={`p-4 rounded-xl border ${avVideoWorking ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                <div className="flex items-center gap-3">
+                  {avVideoWorking ? (
+                    <CheckCircle className="w-6 h-6 text-emerald-400" />
+                  ) : (
+                    <XCircle className="w-6 h-6 text-red-400" />
+                  )}
+                  <div>
+                    <p className={`font-medium ${avVideoWorking ? 'text-emerald-400' : 'text-red-400'}`}>
+                      Camera
+                    </p>
+                    <p className="text-sm text-neutral-500">
+                      {avVideoWorking ? 'Working' : 'Not detected'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-xl border ${avAudioWorking ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                <div className="flex items-center gap-3">
+                  {avAudioWorking ? (
+                    <CheckCircle className="w-6 h-6 text-emerald-400" />
+                  ) : (
+                    <XCircle className="w-6 h-6 text-red-400" />
+                  )}
+                  <div>
+                    <p className={`font-medium ${avAudioWorking ? 'text-emerald-400' : 'text-red-400'}`}>
+                      Microphone
+                    </p>
+                    <p className="text-sm text-neutral-500">
+                      {avAudioWorking ? 'Working' : 'Not detected'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (avCheckStream) {
+                    avCheckStream.getTracks().forEach(track => track.stop());
+                    setAvCheckStream(null);
+                  }
+                  setStep('setup');
+                }}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                onClick={confirmAVAndStart}
+                disabled={!avVideoWorking || !avAudioWorking}
+                className="flex-1"
+              >
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Confirm & Start Interview
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Tips */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center text-sm text-neutral-500"
+          >
+            <p>Make sure you're in a well-lit, quiet environment for the best results.</p>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 'setup') {
     return (
