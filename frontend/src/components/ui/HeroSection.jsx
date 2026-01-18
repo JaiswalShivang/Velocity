@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import WorldMap from "./WorldMap";
 import { AnimatedGradientText, AnimatedLetters } from "./AnimatedText";
+import FeaturesCard from "./FeaturesCard";
 
 const worldMapDots = [
   {
@@ -45,9 +46,9 @@ export default function HeroSection() {
       {/* Background Effects - Minimal */}
       <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-black" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/10 via-transparent to-transparent" />
-      
+
       {/* Grid Pattern */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
@@ -160,7 +161,7 @@ export default function HeroSection() {
         >
           {/* Glow background for map */}
           <div className="absolute inset-0 bg-gradient-to-b from-sky-500/5 via-transparent to-transparent rounded-3xl" />
-          
+
           <div className="text-center mb-8 relative">
             <p className="text-2xl md:text-3xl font-medium text-white">
               Global{" "}
@@ -173,11 +174,12 @@ export default function HeroSection() {
               or find on-site roles across continents.
             </p>
           </div>
-          
+
           <div className="relative p-4 rounded-2xl border border-zinc-800/50 bg-zinc-950/50 backdrop-blur-sm">
             <WorldMap dots={worldMapDots} lineColor="#0ea5e9" />
           </div>
         </motion.div>
+        <FeaturesCard />
       </div>
 
       {/* Bottom Gradient Fade */}

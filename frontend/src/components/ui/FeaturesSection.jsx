@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { 
-  Search, 
-  Sparkles, 
-  Briefcase, 
-  BarChart3, 
-  Bell, 
+import {
+  Search,
+  Sparkles,
+  Briefcase,
+  BarChart3,
+  Bell,
   Users,
   FileText,
   Zap
@@ -247,64 +247,5 @@ function FeatureDescription({ children }) {
   );
 }
 
-// Additional Features Grid Component
-export function AdditionalFeatures() {
-  const additionalFeatures = [
-    {
-      icon: Search,
-      title: "Advanced Search",
-      description: "Filter by salary, location, company size, and more",
-    },
-    {
-      icon: Briefcase,
-      title: "Application Tracking",
-      description: "Track every application status in one dashboard",
-    },
-    {
-      icon: BarChart3,
-      title: "Analytics & Insights",
-      description: "Visualize your job search progress and patterns",
-    },
-    {
-      icon: Users,
-      title: "Community",
-      description: "Connect with other job seekers and share tips",
-    },
-    {
-      icon: FileText,
-      title: "Multiple Resumes",
-      description: "Create role-specific resume versions",
-    },
-    {
-      icon: Zap,
-      title: "Quick Apply",
-      description: "Apply to multiple jobs with one click",
-    },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
-      {additionalFeatures.map((feature, index) => {
-        const Icon = feature.icon;
-        return (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.05 }}
-            className="group relative p-6 rounded-xl border border-zinc-800 bg-zinc-950/50 hover:bg-zinc-900/50 hover:border-zinc-700 transition-all duration-300"
-          >
-            <div className="relative">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center mb-4 group-hover:bg-zinc-700 transition-colors">
-                <Icon className="w-5 h-5 text-sky-400" />
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">{feature.title}</h3>
-              <p className="text-sm text-zinc-400">{feature.description}</p>
-            </div>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
+// Re-export the new DarkGridFeatures component as AdditionalFeatures
+export { default as AdditionalFeatures } from "./dark-grid-features";

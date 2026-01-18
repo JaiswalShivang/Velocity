@@ -5,12 +5,13 @@ import HowItWorksSection from '../components/ui/HowItWorksSection'
 import TestimonialsSection from '../components/ui/TestimonialsSection'
 import CTASection from '../components/ui/CTASection'
 import Footer from '../components/ui/Footer'
+import { StackedCircularFooter } from '../components/ui/stacked-circular-footer'
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-      
+
       {/* Hero Section with World Map */}
       <HeroSection />
 
@@ -19,7 +20,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black" />
         <div className="relative px-4 sm:px-6 lg:px-8">
           <FeaturesSection />
-          
+
           {/* Additional Features Grid */}
           <div className="max-w-7xl mx-auto pb-20">
             <AdditionalFeatures />
@@ -42,7 +43,7 @@ export default function Home() {
       <CTASection />
 
       {/* Footer */}
-      <Footer />
+      <StackedCircularFooter />
     </div>
   )
 }
