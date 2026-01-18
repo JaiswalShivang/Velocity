@@ -102,13 +102,11 @@ export default function Dashboard() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-
           <h1 className="text-4xl font-bold text-white mb-2">
             Welcome back
           </h1>
@@ -188,7 +186,7 @@ export default function Dashboard() {
 
               <Link to="/fellowship" className="group">
                 <div className="relative p-4 rounded-xl bg-gradient-to-br from-emerald-950/50 to-zinc-900 border border-emerald-900/50 overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
-                 
+                  <div className="absolute top-1 right-1 px-1.5 py-0.5 bg-emerald-500/20 rounded text-[9px] text-emerald-400 font-medium">NEW</div>
                   <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-center mb-3">
                     <GraduationCap className="w-5 h-5 text-emerald-400" />
                   </div>

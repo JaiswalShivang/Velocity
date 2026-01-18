@@ -11,6 +11,8 @@ const getSystemPrompt = (jobRole, yearsOfExperience, skills, industry, customIns
 
   return `You are an expert resume writer. Create a professional resume in strict Harvard template format.
 
+IMPORTANT: The current year is 2026. Do NOT suggest updating years or dates. Accept all dates as valid, including those in 2024, 2025, and 2026.
+
 Target Role: ${jobRole}
 Years of Experience: ${yearsOfExperience}
 Key Skills: ${skills.join(', ')}
@@ -173,6 +175,8 @@ export const analyzeATSScore = async (resumeText, jobRole) => {
   try {
     const prompt = `You are an expert ATS (Applicant Tracking System) analyzer and resume reviewer. Analyze the provided resume for a ${jobRole} position.
 
+IMPORTANT: The current year is 2026. Do NOT flag dates from 2024, 2025, or 2026 as outdated or issues. All recent dates are valid.
+
 IMPORTANT: Return ONLY valid JSON, no markdown code blocks, no explanations, just pure JSON.
 
 Analyze and return the following JSON structure:
@@ -271,6 +275,8 @@ const WEAK_VERBS = [
 export const analyzeResumeComprehensive = async (resumeText, jobRole) => {
   try {
     const prompt = `You are a SENIOR RESUME EXPERT with 20+ years of experience helping candidates land jobs at top companies.
+
+IMPORTANT: The current year is 2026. Do NOT flag dates from 2024, 2025, or 2026 as issues. Accept all recent dates as valid and current.
 
 Analyze this resume for a ${jobRole} position with the following COMPREHENSIVE analysis:
 

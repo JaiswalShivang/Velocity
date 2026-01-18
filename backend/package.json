@@ -1,5 +1,5 @@
 {
-  "name": "ai-resume-builder-backend",
+  "name": "velocity",
   "version": "1.0.0",
   "description": "Backend API for AI Resume Builder",
   "main": "src/index.js",
@@ -18,7 +18,6 @@
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.1",
     "firebase-admin": "^12.6.0",
-    "groq-sdk": "^0.37.0",
     "helmet": "^8.0.0",
     "ioredis": "^5.8.2",
     "mongoose": "^9.1.1",
@@ -27,7 +26,6 @@
     "nodemailer": "^7.0.12",
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.17.2",
-    "razorpay": "^2.9.6",
     "socket.io": "^4.8.3",
     "uuid": "^10.0.0"
   },
