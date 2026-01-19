@@ -1,32 +1,16 @@
 import express from 'express';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 import { verifyToken } from '../middleware/auth.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import FellowshipProfile from '../models/FellowshipProfile.model.js';
 import Challenge from '../models/Challenge.model.js';
 import Proposal from '../models/Proposal.model.js';
 import { FellowshipChatRoom, FellowshipMessage } from '../models/FellowshipChat.model.js';
-import { sendProposalApprovalEmail } from '../services/mailService.js';
+import { sendProposalApprovalEmail, sendVerificationEmail } from '../services/mailService.js';
 
 const router = express.Router();
 
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: parseInt(process.env.EMAIL_PORT || '587') === 465,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    family: 4, // Force IPv4
-    connectionTimeout: 10000,
-    greetingTimeout: 5000,
-    socketTimeout: 10000
-});
+
 
 const ACADEMIC_DOMAINS = ['.edu', '.ac.in', '.edu.in', '.edu.au', '.ac.uk', '.edu.pk'];
 
@@ -114,22 +98,7 @@ router.post('/verify/send-email', verifyToken, asyncHandler(async (req, res) => 
     profile.verifiedEmail = email;
     await profile.save();
 
-    await transporter.sendMail({
-        from: `"Velocity Fellowships" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Verify Your Fellowship Account',
-        html: `
-      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #10b981;">Velocity Fellowships</h2>
-        <p>Your verification code is:</p>
-        <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-          <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1f2937;">${code}</span>
-        </div>
-        <p style="color: #6b7280;">This code expires in 10 minutes.</p>
-        <p style="color: #6b7280; font-size: 12px;">If you didn't request this, please ignore this email.</p>
-      </div>
-    `
-    });
+    await sendVerificationEmail({ email, code });
 
     res.json({
         success: true,

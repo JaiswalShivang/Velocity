@@ -334,3 +334,49 @@ export const sendProposalApprovalEmail = async ({
     throw new Error(`Failed to send proposal approval email: ${error.message}`);
   }
 };
+
+
+/**
+ * Send verification code email
+ */
+export const sendVerificationEmail = async ({ email, code }) => {
+  try {
+    if (!email || !code) {
+      throw new Error('Email and verification code are required');
+    }
+
+    if (isExternalServiceConfigured) {
+      return await callEmailService('/api/send-verification', {
+        email,
+        code
+      });
+    }
+
+    // Fallback to local SMTP
+    const transport = await initLocalTransporter();
+
+    const mailOptions = {
+      from: `"Velocity Fellowships" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Verify Your Fellowship Account',
+      html: `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #10b981;">Velocity Fellowships</h2>
+        <p>Your verification code is:</p>
+        <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+          <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1f2937;">${code}</span>
+        </div>
+        <p style="color: #6b7280;">This code expires in 10 minutes.</p>
+        <p style="color: #6b7280; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+      </div>
+    `
+    };
+
+    const info = await transport.sendMail(mailOptions);
+    console.log('Verification email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    throw new Error(`Failed to send verification email: ${error.message}`);
+  }
+};
